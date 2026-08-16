@@ -2,11 +2,9 @@ name: Update Age
 
 on:
   schedule:
-    # Runs every day at 00:05 UTC
-    # = 05:35 AM IST
+    # Runs every day at 00:05 UTC = 05:35 AM IST
     - cron: "5 0 * * *"
 
-  # Allows you to run it manually from GitHub
   workflow_dispatch:
 
 jobs:
@@ -20,15 +18,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update age
+      - name: Update profile
         run: |
           python3 << 'PY'
           import json
           from datetime import date
+          from xml.sax.saxutils import escape
 
           DOB = date(2006, 9, 27)
           TODAY = date.today()
 
+          # Calculate age
           years = TODAY.year - DOB.year
 
           if (TODAY.month, TODAY.day) < (DOB.month, DOB.day):
@@ -69,23 +69,145 @@ jobs:
 
           age = f"{years} years, {months} months, {days} days"
 
-          with open("profile.json", "r") as file:
+          # Update profile.json
+          with open("profile.json", "r", encoding="utf-8") as file:
               data = json.load(file)
 
           data["age"] = age
 
-          with open("profile.json", "w") as file:
+          with open("profile.json", "w", encoding="utf-8") as file:
               json.dump(data, file, indent=2)
               file.write("\n")
+
+          # Escape text for SVG
+          name = escape(data["name"])
+          age = escape(data["age"])
+          college = escape(data["college"])
+          degree = escape(data["degree"])
+          graduation = escape(str(data["graduation"]))
+
+          # Generate profile card
+          svg = f'''<svg width="900" height="360" viewBox="0 0 900 360"
+          xmlns="http://www.w3.org/2000/svg">
+
+            <defs>
+              <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0d1117"/>
+                <stop offset="100%" stop-color="#161b22"/>
+              </linearGradient>
+
+              <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#58a6ff"/>
+                <stop offset="100%" stop-color="#bc8cff"/>
+              </linearGradient>
+            </defs>
+
+            <rect width="900" height="360" rx="24"
+                  fill="url(#bg)"
+                  stroke="#30363d"
+                  stroke-width="2"/>
+
+            <rect x="0" y="0" width="8" height="360"
+                  rx="4"
+                  fill="url(#accent)"/>
+
+            <text x="55" y="65"
+                  font-family="Arial, sans-serif"
+                  font-size="30"
+                  font-weight="bold"
+                  fill="#f0f6fc">
+              {name}
+            </text>
+
+            <text x="55" y="95"
+                  font-family="Arial, sans-serif"
+                  font-size="16"
+                  fill="#8b949e">
+              Computer Science • Developer • Open Source
+            </text>
+
+            <line x1="55" y1="120" x2="845" y2="120"
+                  stroke="#30363d"
+                  stroke-width="1"/>
+
+            <text x="55" y="160"
+                  font-family="Arial, sans-serif"
+                  font-size="15"
+                  fill="#8b949e">
+              AGE
+            </text>
+
+            <text x="55" y="190"
+                  font-family="Arial, sans-serif"
+                  font-size="22"
+                  font-weight="bold"
+                  fill="#58a6ff">
+              {age}
+            </text>
+
+            <text x="55" y="235"
+                  font-family="Arial, sans-serif"
+                  font-size="15"
+                  fill="#8b949e">
+              DEGREE
+            </text>
+
+            <text x="55" y="262"
+                  font-family="Arial, sans-serif"
+                  font-size="18"
+                  fill="#f0f6fc">
+              {degree}
+            </text>
+
+            <text x="450" y="160"
+                  font-family="Arial, sans-serif"
+                  font-size="15"
+                  fill="#8b949e">
+              COLLEGE
+            </text>
+
+            <text x="450" y="190"
+                  font-family="Arial, sans-serif"
+                  font-size="17"
+                  fill="#f0f6fc">
+              {college}
+            </text>
+
+            <text x="450" y="235"
+                  font-family="Arial, sans-serif"
+                  font-size="15"
+                  fill="#8b949e">
+              GRADUATION
+            </text>
+
+            <text x="450" y="262"
+                  font-family="Arial, sans-serif"
+                  font-size="18"
+                  fill="#f0f6fc">
+              {graduation}
+            </text>
+
+            <text x="55" y="320"
+                  font-family="monospace"
+                  font-size="13"
+                  fill="#8b949e">
+              profile.json • automatically updated daily
+            </text>
+
+          </svg>'''
+
+          with open("profile-card.svg", "w", encoding="utf-8") as file:
+              file.write(svg)
+
           PY
 
-      - name: Commit updated age
+      - name: Commit updated profile
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add profile.json
+          git add profile.json profile-card.svg
 
-          git diff --cached --quiet || git commit -m "Update age"
+          git diff --cached --quiet || git commit -m "Update profile"
 
           git push

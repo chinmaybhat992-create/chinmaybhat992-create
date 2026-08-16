@@ -1,16 +1,27 @@
-## Hi there 👋
+# 👋 Hi, I'm Chinmay Bhat
 
-<!--
-**chinmaybhat992-create/chinmaybhat992-create** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+<p align="center">
+  <img src="./profile-card.svg" alt="Chinmay Bhat profile card">
+</p>
 
-Here are some ideas to get you started:
+## 🚀 About Me
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+I'm a Computer Science Engineering student who enjoys building things with code and exploring web development, databases, and open source.
+
+### 🛠️ Currently Exploring
+
+- 🌐 Web Development
+- ⚡ JavaScript
+- 🗄️ SQL & Databases
+- 🐙 Git & GitHub
+- 🌱 Open Source
+
+### 📌 Profile Data
+
+My profile information is maintained in [`profile.json`](./profile.json) and automatically updated using GitHub Actions.
+
+> 🎂 Age is automatically recalculated every day.
+
+---
+
+⭐ Feel free to explore my repositories!
