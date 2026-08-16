@@ -1,0 +1,91 @@
+name: Update Age
+
+on:
+  schedule:
+    # Runs every day at 00:05 UTC
+    # = 05:35 AM IST
+    - cron: "5 0 * * *"
+
+  # Allows you to run it manually from GitHub
+  workflow_dispatch:
+
+jobs:
+  update-age:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update age
+        run: |
+          python3 << 'PY'
+          import json
+          from datetime import date
+
+          DOB = date(2006, 9, 27)
+          TODAY = date.today()
+
+          years = TODAY.year - DOB.year
+
+          if (TODAY.month, TODAY.day) < (DOB.month, DOB.day):
+              years -= 1
+
+          last_birthday = date(
+              DOB.year + years,
+              DOB.month,
+              DOB.day
+          )
+
+          months = TODAY.month - last_birthday.month
+
+          if TODAY.day < last_birthday.day:
+              months -= 1
+
+          if months < 0:
+              months += 12
+
+          if TODAY.day >= last_birthday.day:
+              days = TODAY.day - last_birthday.day
+          else:
+              previous_month = TODAY.month - 1
+
+              if previous_month == 0:
+                  previous_month = 12
+                  previous_year = TODAY.year - 1
+              else:
+                  previous_year = TODAY.year
+
+              days = (
+                  TODAY - date(
+                      previous_year,
+                      previous_month,
+                      last_birthday.day
+                  )
+              ).days
+
+          age = f"{years} years, {months} months, {days} days"
+
+          with open("profile.json", "r") as file:
+              data = json.load(file)
+
+          data["age"] = age
+
+          with open("profile.json", "w") as file:
+              json.dump(data, file, indent=2)
+              file.write("\n")
+          PY
+
+      - name: Commit updated age
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add profile.json
+
+          git diff --cached --quiet || git commit -m "Update age"
+
+          git push
