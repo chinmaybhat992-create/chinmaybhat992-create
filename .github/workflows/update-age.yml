@@ -18,12 +18,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Update profile and generate card
+      - name: Install Pillow
+        run: |
+          python3 -m pip install --upgrade pillow
+
+      - name: Update profile and generate terminal animation
         run: |
           python3 << 'PY'
           import json
+          import math
           from datetime import date
-          from xml.sax.saxutils import escape
+          from PIL import Image, ImageDraw, ImageFont
+
 
           # ==========================================
           # DATE CALCULATION
@@ -88,481 +94,321 @@ jobs:
 
 
           # ==========================================
-          # ESCAPE DATA
+          # TERMINAL DATA
           # ==========================================
 
-          name = escape(data["name"])
-          age = escape(data["age"])
-          college = escape(data["college"])
-          degree = escape(data["degree"])
-          graduation = escape(str(data["graduation"]))
-
-
-          # ==========================================
-          # TERMINAL SETTINGS
-          # ==========================================
-
-          FONT = (
-              "ui-monospace, SFMono-Regular, Menlo, Monaco, "
-              "Consolas, 'Liberation Mono', monospace"
-          )
-
-          GREEN = "#39ff14"
-          DIM_GREEN = "#20a80f"
+          name = data["name"]
+          college = data["college"]
+          degree = data["degree"]
+          graduation = str(data["graduation"])
 
 
           # ==========================================
-          # ONE-SHOT TYPING ANIMATION
+          # IMAGE SETTINGS
           # ==========================================
 
-          def type_line(
-              text_id,
-              x,
-              y,
-              text,
-              begin,
-              duration,
-              width,
-              font_size=17,
-              weight="normal",
-              color=GREEN
-          ):
+          WIDTH = 1000
+          HEIGHT = 500
 
-              return f'''
-              <clipPath id="clip_{text_id}">
-                <rect
-                  x="{x}"
-                  y="{y - font_size}"
-                  width="0"
-                  height="{font_size + 12}">
+          BG = (2, 6, 2)
+          GREEN = (57, 255, 20)
+          DIM_GREEN = (32, 168, 15)
+          BORDER = (57, 255, 20)
 
-                  <animate
-                    attributeName="width"
-                    from="0"
-                    to="{width}"
-                    begin="{begin}s"
-                    dur="{duration}s"
-                    fill="freeze"/>
+          FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+          BOLD_FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
 
-                </rect>
-              </clipPath>
-
-              <text
-                x="{x}"
-                y="{y}"
-                font-family="{FONT}"
-                font-size="{font_size}"
-                font-weight="{weight}"
-                fill="{color}"
-                clip-path="url(#clip_{text_id})"
-                filter="url(#glow)">
-
-                {text}
-
-              </text>
-              '''
+          FONT_SMALL = ImageFont.truetype(FONT_PATH, 17)
+          FONT_NORMAL = ImageFont.truetype(FONT_PATH, 20)
+          FONT_LARGE = ImageFont.truetype(BOLD_FONT_PATH, 30)
 
 
           # ==========================================
-          # HEADER
+          # TERMINAL CONTENT
           # ==========================================
 
-          header_left = type_line(
-              "header_left",
-              28,
-              34,
-              "CHINMAY_OS v1.0",
-              0,
-              0.6,
-              220,
-              15
-          )
+          lines = [
+              ("> whoami", "normal"),
+              (name, "large"),
+              ("COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE", "dim"),
 
-          header_center = type_line(
-              "header_center",
-              450,
-              34,
-              "TERMINAL // PROFILE",
-              0.2,
-              0.7,
-              240,
-              15
-          )
+              ("> cat profile.json", "normal"),
 
-          header_right = type_line(
-              "header_right",
-              870,
-              34,
-              "ONLINE",
-              0.4,
-              0.5,
-              90,
-              15
-          )
+              ("{", "normal"),
+              (f'  "age"        : "{age}"', "normal"),
+              (f'  "college"    : "{college}"', "normal"),
+              (f'  "degree"     : "{degree}"', "normal"),
+              (f'  "graduation" : {graduation}', "normal"),
+              ("}", "normal"),
+
+              ("> status", "normal"),
+              ("[ ONLINE ]", "normal"),
+              ("> _", "normal")
+          ]
 
 
           # ==========================================
-          # WHOAMI
+          # FONT SELECTION
           # ==========================================
 
-          whoami = type_line(
-              "whoami",
-              30,
-              82,
-              "&gt; whoami",
-              1.1,
-              0.5,
-              150,
-              18
-          )
+          def get_font(kind):
+              if kind == "large":
+                  return FONT_LARGE
 
-          name_line = type_line(
-              "name",
-              30,
-              116,
-              name,
-              1.8,
-              0.8,
-              350,
-              27,
-              "bold"
-          )
-
-          subtitle = type_line(
-              "subtitle",
-              30,
-              144,
-              "COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE",
-              2.8,
-              0.9,
-              540,
-              15,
-              "normal",
-              DIM_GREEN
-          )
+              return FONT_NORMAL
 
 
           # ==========================================
-          # PROFILE COMMAND
+          # CRT FRAME
           # ==========================================
 
-          cat_command = type_line(
-              "cat",
-              30,
-              178,
-              "&gt; cat profile.json",
-              4.0,
-              0.6,
-              260,
-              18
-          )
+          def create_frame(visible_text):
+
+              image = Image.new(
+                  "RGB",
+                  (WIDTH, HEIGHT),
+                  BG
+              )
+
+              draw = ImageDraw.Draw(image)
+
+
+              # ------------------------------------------
+              # CRT BORDER
+              # ------------------------------------------
+
+              draw.rectangle(
+                  [2, 2, WIDTH - 3, HEIGHT - 3],
+                  outline=BORDER,
+                  width=2
+              )
+
+
+              # ------------------------------------------
+              # HEADER
+              # ------------------------------------------
+
+              header_font = FONT_SMALL
+
+              draw.text(
+                  (28, 20),
+                  "CHINMAY_OS v1.0",
+                  font=header_font,
+                  fill=GREEN
+              )
+
+              draw.text(
+                  (WIDTH // 2, 20),
+                  "TERMINAL // PROFILE",
+                  font=header_font,
+                  fill=GREEN,
+                  anchor="ma"
+              )
+
+              draw.text(
+                  (WIDTH - 28, 20),
+                  "ONLINE",
+                  font=header_font,
+                  fill=GREEN,
+                  anchor="ra"
+              )
+
+
+              draw.line(
+                  [(20, 50), (WIDTH - 20, 50)],
+                  fill=DIM_GREEN,
+                  width=1
+              )
+
+
+              # ------------------------------------------
+              # TERMINAL TEXT
+              # ------------------------------------------
+
+              y = 75
+
+              for index, (full_text, kind) in enumerate(lines):
+
+                  if index >= len(visible_text):
+                      break
+
+                  current_text = visible_text[index]
+
+                  if kind == "large":
+                      font = FONT_LARGE
+                  elif kind == "dim":
+                      font = FONT_SMALL
+                  else:
+                      font = FONT_NORMAL
+
+
+                  color = (
+                      DIM_GREEN
+                      if kind == "dim"
+                      else GREEN
+                  )
+
+
+                  draw.text(
+                      (30, y),
+                      current_text,
+                      font=font,
+                      fill=color
+                  )
+
+
+                  if kind == "large":
+                      y += 48
+                  else:
+                      y += 31
+
+
+              # ------------------------------------------
+              # JSON BOX
+              # ------------------------------------------
+
+              json_start = 195
+              json_end = 405
+
+              draw.rectangle(
+                  [20, json_start, WIDTH - 20, json_end],
+                  outline=DIM_GREEN,
+                  width=1
+              )
+
+
+              # ------------------------------------------
+              # SCANLINES
+              # ------------------------------------------
+
+              for y_scan in range(0, HEIGHT, 4):
+
+                  draw.line(
+                      [(0, y_scan), (WIDTH, y_scan)],
+                      fill=(8, 35, 8),
+                      width=1
+                  )
+
+
+              # ------------------------------------------
+              # SUBTLE CRT GLOW
+              # ------------------------------------------
+
+              glow = image.copy()
+
+              glow_draw = ImageDraw.Draw(glow)
+
+              glow_draw.rectangle(
+                  [2, 2, WIDTH - 3, HEIGHT - 3],
+                  outline=(20, 100, 20),
+                  width=5
+              )
+
+              glow = glow.filter(
+                  __import__("PIL").ImageFilter.GaussianBlur(4)
+              )
+
+              image = Image.blend(
+                  glow,
+                  image,
+                  0.82
+              )
+
+
+              return image
 
 
           # ==========================================
-          # JSON
+          # BUILD TYPING SEQUENCE
           # ==========================================
 
-          opening = type_line(
-              "opening",
-              55,
-              218,
-              "&#123;",
-              4.8,
-              0.25,
-              35,
-              18
-          )
-
-          age_line = type_line(
-              "age",
-              80,
-              248,
-              f'"age"        : "{age}"',
-              5.2,
-              0.75,
-              650,
-              17
-          )
-
-          college_line = type_line(
-              "college",
-              80,
-              278,
-              f'"college"    : "{college}"',
-              6.1,
-              0.9,
-              790,
-              17
-          )
-
-          degree_line = type_line(
-              "degree",
-              80,
-              308,
-              f'"degree"     : "{degree}"',
-              7.2,
-              0.65,
-              520,
-              17
-          )
-
-          graduation_line = type_line(
-              "graduation",
-              80,
-              338,
-              f'"graduation" : {graduation}',
-              8.0,
-              0.6,
-              300,
-              17
-          )
-
-          closing = type_line(
-              "closing",
-              55,
-              368,
-              "&#125;",
-              8.8,
-              0.25,
-              35,
-              18
-          )
+          frames = []
 
 
-          # ==========================================
-          # STATUS
-          # ==========================================
+          # Number of frames used for each character.
+          FRAMES_PER_CHARACTER = 2
 
-          status = type_line(
-              "status",
-              30,
-              408,
-              "&gt; status",
-              9.5,
-              0.5,
-              150,
-              18
-          )
 
-          online = type_line(
-              "online",
-              155,
-              408,
-              "[ ONLINE ]",
-              10.1,
-              0.6,
-              180,
-              18
-          )
+          # ------------------------------------------
+          # Start with empty terminal
+          # ------------------------------------------
 
-          cursor = type_line(
-              "cursor",
-              30,
-              438,
-              "&gt; _",
-              10.9,
-              0.3,
-              60,
-              18
+          visible = [""]
+
+          frames.append(
+              create_frame(visible)
           )
 
 
-          # ==========================================
-          # GENERATE SVG
-          # ==========================================
+          # ------------------------------------------
+          # Type each line continuously
+          # ------------------------------------------
 
-          svg = f'''<svg
-            width="900"
-            height="460"
-            viewBox="0 0 900 460"
-            xmlns="http://www.w3.org/2000/svg">
+          for line_index, (text, kind) in enumerate(lines):
 
-            <defs>
-
-              <!-- CRT scanlines -->
-
-              <pattern
-                id="scanlines"
-                width="4"
-                height="4"
-                patternUnits="userSpaceOnUse">
-
-                <rect
-                  width="4"
-                  height="2"
-                  fill="{GREEN}"
-                  opacity="0.035"/>
-
-              </pattern>
+              if line_index == 0:
+                  previous = ""
+              else:
+                  previous = lines[line_index - 1][0]
 
 
-              <!-- Green phosphor glow -->
+              # Ensure earlier lines remain visible.
+              visible = [
+                  lines[i][0]
+                  for i in range(line_index)
+              ]
 
-              <filter
-                id="glow"
-                x="-30%"
-                y="-30%"
-                width="160%"
-                height="160%">
-
-                <feGaussianBlur
-                  stdDeviation="1.8"
-                  result="blur"/>
-
-                <feMerge>
-
-                  <feMergeNode in="blur"/>
-                  <feMergeNode in="SourceGraphic"/>
-
-                </feMerge>
-
-              </filter>
+              visible.append("")
 
 
-              <!-- CRT vignette -->
+              # Type the current line character-by-character.
+              for character_index in range(1, len(text) + 1):
 
-              <radialGradient id="vignette">
+                  visible[-1] = text[:character_index]
 
-                <stop
-                  offset="0%"
-                  stop-color="#061006"
-                  stop-opacity="0"/>
+                  frame = create_frame(
+                      visible.copy()
+                  )
 
-                <stop
-                  offset="70%"
-                  stop-color="#020502"
-                  stop-opacity="0.08"/>
-
-                <stop
-                  offset="100%"
-                  stop-color="#000000"
-                  stop-opacity="0.7"/>
-
-              </radialGradient>
-
-            </defs>
+                  for _ in range(FRAMES_PER_CHARACTER):
+                      frames.append(frame)
 
 
-            <!-- ====================================== -->
-            <!-- SCREEN -->
-            <!-- ====================================== -->
+              # Pause briefly after finishing each line.
+              finished = create_frame(
+                  visible.copy()
+              )
 
-            <rect
-              x="1"
-              y="1"
-              width="898"
-              height="458"
-              fill="#020402"
-              stroke="{GREEN}"
-              stroke-width="1.5"/>
-
-
-            <!-- Scanlines -->
-
-            <rect
-              x="1"
-              y="1"
-              width="898"
-              height="458"
-              fill="url(#scanlines)"/>
-
-
-            <!-- Vignette -->
-
-            <rect
-              x="1"
-              y="1"
-              width="898"
-              height="458"
-              fill="url(#vignette)"/>
-
-
-            <!-- ====================================== -->
-            <!-- HEADER -->
-            <!-- ====================================== -->
-
-            {header_left}
-
-            {header_center}
-
-            {header_right}
-
-
-            <line
-              x1="20"
-              y1="52"
-              x2="880"
-              y2="52"
-              stroke="{GREEN}"
-              stroke-width="1"
-              opacity="0.7"/>
-
-
-            <!-- ====================================== -->
-            <!-- WHOAMI -->
-            <!-- ====================================== -->
-
-            {whoami}
-
-            {name_line}
-
-            {subtitle}
-
-
-            <!-- ====================================== -->
-            <!-- CAT COMMAND -->
-            <!-- ====================================== -->
-
-            {cat_command}
-
-
-            <!-- JSON BORDER -->
-
-            <rect
-              x="28"
-              y="192"
-              width="844"
-              height="190"
-              fill="none"
-              stroke="{DIM_GREEN}"
-              stroke-width="1"
-              opacity="0.6"/>
-
-
-            <!-- JSON CONTENT -->
-
-            {opening}
-
-            {age_line}
-
-            {college_line}
-
-            {degree_line}
-
-            {graduation_line}
-
-            {closing}
-
-
-            <!-- ====================================== -->
-            <!-- STATUS -->
-            <!-- ====================================== -->
-
-            {status}
-
-            {online}
-
-            {cursor}
-
-          </svg>'''
+              for _ in range(4):
+                  frames.append(finished)
 
 
           # ==========================================
-          # SAVE SVG
+          # FINAL STATIC FRAME
           # ==========================================
 
-          with open("profile-card.svg", "w", encoding="utf-8") as file:
-              file.write(svg)
+          final_frame = create_frame(
+              [line[0] for line in lines]
+          )
+
+
+          # Keep final frame visible for several seconds.
+          for _ in range(25):
+              frames.append(final_frame)
+
+
+          # ==========================================
+          # SAVE GIF
+          # ==========================================
+
+          frames[0].save(
+              "profile-card.gif",
+              save_all=True,
+              append_images=frames[1:],
+              duration=45,
+              loop=0,
+              optimize=True
+          )
 
           PY
 
@@ -572,7 +418,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add profile.json profile-card.svg
+          git add profile.json profile-card.gif
 
           git diff --cached --quiet || git commit -m "Update profile"
 
