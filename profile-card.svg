@@ -1,305 +1,386 @@
 <svg
-  width="900"
-  height="390"
-  viewBox="0 0 900 390"
-  xmlns="http://www.w3.org/2000/svg">
+width="900"
+height="410"
+viewBox="0 0 900 410"
+xmlns="http://www.w3.org/2000/svg">
 
   <defs>
 
-    <!-- Background -->
-    <linearGradient
-      id="background"
-      x1="0"
-      y1="0"
-      x2="1"
-      y2="1">
+    <!-- CRT scanlines -->
+    <pattern
+      id="scanlines"
+      width="4"
+      height="4"
+      patternUnits="userSpaceOnUse">
 
-      <stop offset="0%" stop-color="#0d1117"/>
-      <stop offset="100%" stop-color="#151b23"/>
+      <rect
+        width="4"
+        height="2"
+        fill="#39ff14"
+        opacity="0.035"/>
 
-    </linearGradient>
+    </pattern>
 
-    <!-- Accent -->
-    <linearGradient
-      id="accent"
-      x1="0"
-      y1="0"
-      x2="1"
-      y2="0">
 
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#3b82f6"/>
+    <!-- Phosphor glow -->
+    <filter
+      id="glow"
+      x="-30%"
+      y="-30%"
+      width="160%"
+      height="160%">
 
-    </linearGradient>
+      <feGaussianBlur
+        stdDeviation="2.2"
+        result="blur"/>
+
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+
+    </filter>
+
+
+    <!-- CRT vignette -->
+    <radialGradient id="vignette">
+
+      <stop
+        offset="0%"
+        stop-color="#061006"
+        stop-opacity="0"/>
+
+      <stop
+        offset="75%"
+        stop-color="#020502"
+        stop-opacity="0.08"/>
+
+      <stop
+        offset="100%"
+        stop-color="#000000"
+        stop-opacity="0.65"/>
+
+    </radialGradient>
 
   </defs>
 
 
-  <!-- CARD -->
+  <!-- ====================================== -->
+  <!-- CRT SCREEN -->
+  <!-- ====================================== -->
 
   <rect
     x="1"
     y="1"
     width="898"
-    height="388"
-    rx="20"
-    fill="url(#background)"
-    stroke="#30363d"
-    stroke-width="2"/>
+    height="408"
+    fill="#030603"
+    stroke="#39ff14"
+    stroke-width="1"/>
 
 
-  <!-- LEFT ACCENT -->
+  <!-- Scanlines -->
 
   <rect
-    x="0"
-    y="0"
-    width="6"
-    height="390"
-    rx="3"
-    fill="url(#accent)"/>
+    x="1"
+    y="1"
+    width="898"
+    height="408"
+    fill="url(#scanlines)"/>
 
 
+  <!-- Vignette -->
+
+  <rect
+    x="1"
+    y="1"
+    width="898"
+    height="408"
+    fill="url(#vignette)"/>
+
+
+  <!-- ====================================== -->
   <!-- TERMINAL HEADER -->
+  <!-- ====================================== -->
 
-  <circle
-    cx="32"
-    cy="30"
-    r="6"
-    fill="#ff5f56"/>
+  <g
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    filter="url(#glow)">
 
-  <circle
-    cx="54"
-    cy="30"
-    r="6"
-    fill="#ffbd2e"/>
+    <text
+      x="28"
+      y="30"
+      font-size="12"
+      fill="#39ff14">
+      CHINMAY_OS v1.0
+    </text>
 
-  <circle
-    cx="76"
-    cy="30"
-    r="6"
-    fill="#27c93f"/>
 
+    <text
+      x="450"
+      y="30"
+      text-anchor="middle"
+      font-size="12"
+      fill="#39ff14">
+      TERMINAL // PROFILE
+    </text>
+
+
+    <text
+      x="872"
+      y="30"
+      text-anchor="end"
+      font-size="12"
+      fill="#39ff14">
+      ONLINE
+    </text>
+
+  </g>
+
+
+  <!-- HEADER LINE -->
+
+  <line
+    x1="20"
+    y1="45"
+    x2="880"
+    y2="45"
+    stroke="#39ff14"
+    stroke-width="1"
+    opacity="0.75"/>
+
+
+  <!-- ====================================== -->
+  <!-- WHOAMI -->
+  <!-- ====================================== -->
+
+  <g
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    filter="url(#glow)">
+
+    <text
+      x="28"
+      y="72"
+      font-size="13"
+      fill="#39ff14">
+      &gt; whoami
+    </text>
+
+
+    <text
+      x="28"
+      y="96"
+      font-size="18"
+      font-weight="bold"
+      fill="#39ff14">
+      Chinmay Bhat
+    </text>
+
+
+    <text
+      x="28"
+      y="117"
+      font-size="12"
+      fill="#26b912">
+      COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE
+    </text>
+
+  </g>
+
+
+  <!-- ====================================== -->
+  <!-- PROFILE COMMAND -->
+  <!-- ====================================== -->
 
   <text
-    x="450"
-    y="35"
-    text-anchor="middle"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+    x="28"
+    y="148"
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
     font-size="13"
-    fill="#8b949e">
-
-    chinmay.json
-
+    fill="#39ff14"
+    filter="url(#glow)">
+    &gt; cat profile.json
   </text>
 
 
-  <!-- TERMINAL COMMAND -->
+  <!-- ====================================== -->
+  <!-- JSON BORDER -->
+  <!-- ====================================== -->
+
+  <rect
+    x="28"
+    y="165"
+    width="844"
+    height="165"
+    fill="none"
+    stroke="#26b912"
+    stroke-width="1"
+    opacity="0.65"/>
+
+
+  <!-- ====================================== -->
+  <!-- JSON CONTENT -->
+  <!-- ====================================== -->
+
+  <g
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    font-size="13"
+    filter="url(#glow)">
+
+    <!-- Opening brace -->
+
+    <text
+      x="45"
+      y="190"
+      fill="#39ff14">
+      &#123;
+    </text>
+
+
+    <!-- AGE -->
+
+    <text
+      x="62"
+      y="216"
+      fill="#39ff14">
+      "age"
+    </text>
+
+    <text
+      x="125"
+      y="216"
+      fill="#26b912">
+      :
+    </text>
+
+    <text
+      x="145"
+      y="216"
+      fill="#39ff14">
+      "19 years, 10 months, 20 days"
+    </text>
+
+
+    <!-- COLLEGE -->
+
+    <text
+      x="62"
+      y="243"
+      fill="#39ff14">
+      "college"
+    </text>
+
+    <text
+      x="125"
+      y="243"
+      fill="#26b912">
+      :
+    </text>
+
+    <text
+      x="145"
+      y="243"
+      fill="#39ff14">
+      "Bapuji Institute of Engineering and Technology"
+    </text>
+
+
+    <!-- DEGREE -->
+
+    <text
+      x="62"
+      y="270"
+      fill="#39ff14">
+      "degree"
+    </text>
+
+    <text
+      x="125"
+      y="270"
+      fill="#26b912">
+      :
+    </text>
+
+    <text
+      x="145"
+      y="270"
+      fill="#39ff14">
+      "BE Computer Science"
+    </text>
+
+
+    <!-- GRADUATION -->
+
+    <text
+      x="62"
+      y="297"
+      fill="#39ff14">
+      "graduation"
+    </text>
+
+    <text
+      x="145"
+      y="297"
+      fill="#26b912">
+      :
+    </text>
+
+    <text
+      x="165"
+      y="297"
+      fill="#39ff14">
+      2028
+    </text>
+
+
+    <!-- Closing brace -->
+
+    <text
+      x="45"
+      y="320"
+      fill="#39ff14">
+      &#125;
+    </text>
+
+  </g>
+
+
+  <!-- ====================================== -->
+  <!-- STATUS -->
+  <!-- ====================================== -->
 
   <text
-    x="45"
-    y="82"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="14"
-    fill="#8b949e">
-
-    &gt; profile --info
-
+    x="28"
+    y="357"
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    font-size="13"
+    fill="#39ff14"
+    filter="url(#glow)">
+    &gt; status
   </text>
 
 
-  <!-- NAME -->
-
   <text
-    x="45"
-    y="122"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="30"
-    font-weight="700"
-    fill="#f0f6fc">
-
-    Chinmay Bhat
-
+    x="105"
+    y="357"
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    font-size="13"
+    fill="#39ff14"
+    filter="url(#glow)">
+    [ ONLINE ]
   </text>
 
 
-  <!-- SUBTITLE -->
+  <!-- CURSOR -->
 
   <text
-    x="45"
-    y="149"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="14"
-    fill="#8b949e">
-
-    Computer Science  •  Developer  •  Open Source
-
-  </text>
-
-
-  <!-- DIVIDER -->
-
-  <line
-    x1="45"
-    y1="174"
-    x2="855"
-    y2="174"
-    stroke="#30363d"
-    stroke-width="1"/>
-
-
-  <!-- AGE LABEL -->
-
-  <text
-    x="45"
-    y="207"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    age
-
-  </text>
-
-
-  <!-- AGE VALUE -->
-
-  <text
-    x="45"
-    y="231"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="16"
-    fill="#f0f6fc">
-
-    19 years, 10 months, 20 days
-
-  </text>
-
-
-  <!-- COLLEGE LABEL -->
-
-  <text
-    x="45"
-    y="263"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    college
-
-  </text>
-
-
-  <!-- COLLEGE VALUE -->
-
-  <text
-    x="45"
-    y="287"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="16"
-    fill="#f0f6fc">
-
-    Bapuji Institute of Engineering and Technology
-
-  </text>
-
-
-  <!-- DEGREE LABEL -->
-
-  <text
-    x="500"
-    y="207"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    degree
-
-  </text>
-
-
-  <!-- DEGREE VALUE -->
-
-  <text
-    x="500"
-    y="231"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="16"
-    fill="#f0f6fc">
-
-    BE Computer Science
-
-  </text>
-
-
-  <!-- GRADUATION LABEL -->
-
-  <text
-    x="500"
-    y="263"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    graduation
-
-  </text>
-
-
-  <!-- GRADUATION VALUE -->
-
-  <text
-    x="500"
-    y="287"
-    font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    font-size="16"
-    fill="#f0f6fc">
-
-    2028
-
-  </text>
-
-
-  <!-- BOTTOM DIVIDER -->
-
-  <line
-    x1="45"
-    y1="320"
-    x2="855"
-    y2="320"
-    stroke="#30363d"
-    stroke-width="1"/>
-
-
-  <!-- FOOTER -->
-
-  <text
-    x="45"
-    y="347"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    ~/profile.json
-
-  </text>
-
-
-  <circle
-    cx="818"
-    cy="343"
-    r="5"
-    fill="#27c93f"/>
-
-
-  <text
-    x="830"
-    y="347"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    font-size="12"
-    fill="#8b949e">
-
-    online
-
+    x="28"
+    y="385"
+    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+    font-size="13"
+    fill="#39ff14"
+    filter="url(#glow)">
+    &gt; _
   </text>
 
 </svg>
