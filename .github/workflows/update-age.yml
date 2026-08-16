@@ -103,13 +103,13 @@ jobs:
 
 
           # ==========================================
-          # GITHUB-STYLE TERMINAL PALETTE
+          # IMAGE SETTINGS
           # ==========================================
 
           WIDTH = 900
           HEIGHT = 460
 
-          # GitHub dark background
+          # GitHub dark-mode background
           BG = (13, 17, 23)
 
           # GitHub primary text
@@ -118,17 +118,8 @@ jobs:
           # GitHub secondary text
           MUTED = (139, 148, 158)
 
-          # GitHub border
-          BORDER = (48, 54, 61)
-
           # GitHub green accent
           GREEN = (63, 185, 80)
-
-          # Dark green accent
-          DARK_GREEN = (35, 134, 54)
-
-          # Very subtle scanline
-          SCANLINE = (18, 24, 30)
 
 
           # ==========================================
@@ -226,19 +217,7 @@ jobs:
 
 
               # ======================================
-              # OUTER TERMINAL BORDER
-              # ======================================
-
-              draw.rounded_rectangle(
-                  [1, 1, WIDTH - 2, HEIGHT - 2],
-                  radius=8,
-                  outline=BORDER,
-                  width=1
-              )
-
-
-              # ======================================
-              # HEADER
+              # TERMINAL HEADER
               # ======================================
 
               draw.text(
@@ -265,18 +244,11 @@ jobs:
               )
 
 
-              draw.line(
-                  [(20, 50), (WIDTH - 20, 50)],
-                  fill=BORDER,
-                  width=1
-              )
-
-
               # ======================================
               # TERMINAL CONTENT
               # ======================================
 
-              y = 73
+              y = 72
 
               for index, (_, kind) in enumerate(lines):
 
@@ -285,27 +257,33 @@ jobs:
 
                   current_text = visible_text[index]
 
+
                   if kind == "name":
+
                       font = FONT_LARGE
                       color = WHITE
                       spacing = 45
 
                   elif kind == "muted":
+
                       font = FONT_SMALL
                       color = MUTED
                       spacing = 31
 
                   elif kind == "command":
+
                       font = FONT_NORMAL
                       color = GREEN
                       spacing = 32
 
                   elif kind == "online":
+
                       font = FONT_NORMAL
                       color = GREEN
                       spacing = 32
 
                   else:
+
                       font = FONT_NORMAL
                       color = WHITE
                       spacing = 31
@@ -321,31 +299,6 @@ jobs:
                   y += spacing
 
 
-              # ======================================
-              # JSON PANEL
-              # ======================================
-
-              draw.rounded_rectangle(
-                  [20, 190, WIDTH - 20, 382],
-                  radius=5,
-                  outline=BORDER,
-                  width=1
-              )
-
-
-              # ======================================
-              # SUBTLE CRT SCANLINES
-              # ======================================
-
-              for scan_y in range(0, HEIGHT, 5):
-
-                  draw.line(
-                      [(0, scan_y), (WIDTH, scan_y)],
-                      fill=SCANLINE,
-                      width=1
-                  )
-
-
               return image
 
 
@@ -355,23 +308,23 @@ jobs:
 
           frames = []
 
-          # Number of frames per character.
-          # Higher = slower typing.
-          FRAMES_PER_CHARACTER = 2
+
+          # Faster typing
+          FRAMES_PER_CHARACTER = 1
 
 
-          # ------------------------------------------
-          # Initial empty terminal
-          # ------------------------------------------
+          # ==========================================
+          # INITIAL FRAME
+          # ==========================================
 
           frames.append(
               create_frame([])
           )
 
 
-          # ------------------------------------------
-          # Type continuously from top to bottom
-          # ------------------------------------------
+          # ==========================================
+          # TYPE FROM TOP TO BOTTOM
+          # ==========================================
 
           for line_index, (text, kind) in enumerate(lines):
 
@@ -383,8 +336,11 @@ jobs:
               visible.append("")
 
 
-              # Character-by-character typing
-              for character_index in range(1, len(text) + 1):
+              # Type one character at a time
+              for character_index in range(
+                  1,
+                  len(text) + 1
+              ):
 
                   visible[-1] = text[:character_index]
 
@@ -392,16 +348,15 @@ jobs:
                       visible.copy()
                   )
 
-                  for _ in range(FRAMES_PER_CHARACTER):
-                      frames.append(frame)
+                  frames.append(frame)
 
 
-              # Small pause after completing line
+              # Small pause after completing each line
               finished_frame = create_frame(
                   visible.copy()
               )
 
-              for _ in range(4):
+              for _ in range(2):
                   frames.append(finished_frame)
 
 
@@ -414,7 +369,7 @@ jobs:
           )
 
 
-          # Hold final state
+          # Hold the final completed state
           for _ in range(30):
               frames.append(final_frame)
 
@@ -427,12 +382,16 @@ jobs:
               "profile-card.gif",
               save_all=True,
               append_images=frames[1:],
-              duration=45,
+              duration=35,
               optimize=True
           )
 
           PY
 
+
+      # ==========================================
+      # COMMIT UPDATED PROFILE
+      # ==========================================
 
       - name: Commit updated profile
         run: |
