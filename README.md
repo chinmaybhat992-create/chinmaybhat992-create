@@ -1,7 +1,7 @@
 # 👋 Hi, I'm Chinmay Bhat
 
 <p align="center">
-  <img src="./profile-card.svg" alt="Chinmay Bhat profile card">
+  <img src="./profile-card.gif" alt="Chinmay Bhat terminal profile">
 </p>
 
 ## 🚀 About Me
