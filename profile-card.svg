@@ -1,12 +1,13 @@
 <svg
-width="900"
-height="410"
-viewBox="0 0 900 410"
-xmlns="http://www.w3.org/2000/svg">
+  width="900"
+  height="455"
+  viewBox="0 0 900 455"
+  xmlns="http://www.w3.org/2000/svg">
 
   <defs>
 
     <!-- CRT scanlines -->
+
     <pattern
       id="scanlines"
       width="4"
@@ -23,6 +24,7 @@ xmlns="http://www.w3.org/2000/svg">
 
 
     <!-- Phosphor glow -->
+
     <filter
       id="glow"
       x="-30%"
@@ -31,18 +33,21 @@ xmlns="http://www.w3.org/2000/svg">
       height="160%">
 
       <feGaussianBlur
-        stdDeviation="2.2"
+        stdDeviation="2"
         result="blur"/>
 
       <feMerge>
+
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
+
       </feMerge>
 
     </filter>
 
 
     <!-- CRT vignette -->
+
     <radialGradient id="vignette">
 
       <stop
@@ -51,14 +56,14 @@ xmlns="http://www.w3.org/2000/svg">
         stop-opacity="0"/>
 
       <stop
-        offset="75%"
+        offset="70%"
         stop-color="#020502"
         stop-opacity="0.08"/>
 
       <stop
         offset="100%"
         stop-color="#000000"
-        stop-opacity="0.65"/>
+        stop-opacity="0.7"/>
 
     </radialGradient>
 
@@ -66,17 +71,17 @@ xmlns="http://www.w3.org/2000/svg">
 
 
   <!-- ====================================== -->
-  <!-- CRT SCREEN -->
+  <!-- SCREEN -->
   <!-- ====================================== -->
 
   <rect
     x="1"
     y="1"
     width="898"
-    height="408"
-    fill="#030603"
+    height="453"
+    fill="#020402"
     stroke="#39ff14"
-    stroke-width="1"/>
+    stroke-width="1.5"/>
 
 
   <!-- Scanlines -->
@@ -85,7 +90,7 @@ xmlns="http://www.w3.org/2000/svg">
     x="1"
     y="1"
     width="898"
-    height="408"
+    height="453"
     fill="url(#scanlines)"/>
 
 
@@ -95,56 +100,125 @@ xmlns="http://www.w3.org/2000/svg">
     x="1"
     y="1"
     width="898"
-    height="408"
+    height="453"
     fill="url(#vignette)"/>
 
 
   <!-- ====================================== -->
-  <!-- TERMINAL HEADER -->
+  <!-- HEADER -->
   <!-- ====================================== -->
 
-  <g
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    filter="url(#glow)">
+  
+    <clipPath id="clip1">
+      <rect
+        x="28"
+        y="17"
+        width="0"
+        height="25">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="210"
+          begin="0s"
+          dur="0.7s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
       x="28"
-      y="30"
-      font-size="12"
-      fill="#39ff14">
-      CHINMAY_OS v1.0
-    </text>
+      y="32"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="15"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip1)"
+      filter="url(#glow)">
 
+      CHINMAY_OS v1.0
+
+    </text>
+    
+
+  
+    <clipPath id="clip2">
+      <rect
+        x="450"
+        y="17"
+        width="0"
+        height="25">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="220"
+          begin="0.2s"
+          dur="0.8s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
       x="450"
-      y="30"
-      text-anchor="middle"
-      font-size="12"
-      fill="#39ff14">
-      TERMINAL // PROFILE
-    </text>
+      y="32"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="15"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip2)"
+      filter="url(#glow)">
 
+      TERMINAL // PROFILE
+
+    </text>
+    
+
+  
+    <clipPath id="clip3">
+      <rect
+        x="872"
+        y="17"
+        width="0"
+        height="25">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="80"
+          begin="0.4s"
+          dur="0.5s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
       x="872"
-      y="30"
-      text-anchor="end"
-      font-size="12"
-      fill="#39ff14">
+      y="32"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="15"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip3)"
+      filter="url(#glow)">
+
       ONLINE
+
     </text>
+    
 
-  </g>
-
-
-  <!-- HEADER LINE -->
 
   <line
     x1="20"
-    y1="45"
+    y1="50"
     x2="880"
-    y2="45"
+    y2="50"
     stroke="#39ff14"
     stroke-width="1"
     opacity="0.75"/>
@@ -154,233 +228,485 @@ xmlns="http://www.w3.org/2000/svg">
   <!-- WHOAMI -->
   <!-- ====================================== -->
 
-  <g
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    filter="url(#glow)">
+  
+    <clipPath id="clip4">
+      <rect
+        x="30"
+        y="60"
+        width="0"
+        height="28">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="160"
+          begin="0.8s"
+          dur="0.65s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="28"
-      y="72"
-      font-size="13"
-      fill="#39ff14">
-      &gt; whoami
-    </text>
-
-
-    <text
-      x="28"
-      y="96"
+      x="30"
+      y="78"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
       font-size="18"
-      font-weight="bold"
-      fill="#39ff14">
-      Chinmay Bhat
-    </text>
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip4)"
+      filter="url(#glow)">
 
+      &gt; whoami
+
+    </text>
+    
+
+  
+    <clipPath id="clip5">
+      <rect
+        x="30"
+        y="85"
+        width="0"
+        height="37">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="350"
+          begin="1.5s"
+          dur="1.0s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="28"
-      y="117"
-      font-size="12"
-      fill="#26b912">
-      COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE
-    </text>
+      x="30"
+      y="112"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="27"
+      font-weight="bold"
+      fill="#39ff14"
+      clip-path="url(#clip5)"
+      filter="url(#glow)">
 
-  </g>
+      Chinmay Bhat
+
+    </text>
+    
+
+  
+    <clipPath id="clip6">
+      <rect
+        x="30"
+        y="125"
+        width="0"
+        height="25">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="500"
+          begin="2.4s"
+          dur="1.0s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
+
+    <text
+      x="30"
+      y="140"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="15"
+      font-weight="normal"
+      fill="#20a80f"
+      clip-path="url(#clip6)"
+      filter="url(#glow)">
+
+      COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE
+
+    </text>
+    
 
 
   <!-- ====================================== -->
   <!-- PROFILE COMMAND -->
   <!-- ====================================== -->
 
-  <text
-    x="28"
-    y="148"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    font-size="13"
-    fill="#39ff14"
-    filter="url(#glow)">
-    &gt; cat profile.json
-  </text>
+  
+    <clipPath id="clip7">
+      <rect
+        x="30"
+        y="156"
+        width="0"
+        height="28">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="250"
+          begin="3.5s"
+          dur="0.8s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
+
+    <text
+      x="30"
+      y="174"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip7)"
+      filter="url(#glow)">
+
+      &gt; cat profile.json
+
+    </text>
+    
 
 
-  <!-- ====================================== -->
   <!-- JSON BORDER -->
-  <!-- ====================================== -->
 
   <rect
     x="28"
-    y="165"
+    y="190"
     width="844"
-    height="165"
+    height="190"
     fill="none"
-    stroke="#26b912"
+    stroke="#20a80f"
     stroke-width="1"
     opacity="0.65"/>
 
 
-  <!-- ====================================== -->
-  <!-- JSON CONTENT -->
-  <!-- ====================================== -->
+  <!-- JSON -->
 
-  <g
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    font-size="13"
-    filter="url(#glow)">
+  
+    <clipPath id="clip8">
+      <rect
+        x="50"
+        y="200"
+        width="0"
+        height="28">
 
-    <!-- Opening brace -->
+        <animate
+          attributeName="width"
+          from="0"
+          to="30"
+          begin="4.2s"
+          dur="0.3s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="45"
-      y="190"
-      fill="#39ff14">
+      x="50"
+      y="218"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip8)"
+      filter="url(#glow)">
+
       &#123;
+
     </text>
+    
 
+  
+    <clipPath id="clip9">
+      <rect
+        x="75"
+        y="231"
+        width="0"
+        height="27">
 
-    <!-- AGE -->
+        <animate
+          attributeName="width"
+          from="0"
+          to="600"
+          begin="4.8s"
+          dur="1.0s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="62"
-      y="216"
-      fill="#39ff14">
-      "age"
+      x="75"
+      y="248"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="17"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip9)"
+      filter="url(#glow)">
+
+      "age"        : "19 years, 10 months, 20 days"
+
     </text>
+    
+
+  
+    <clipPath id="clip10">
+      <rect
+        x="75"
+        y="261"
+        width="0"
+        height="27">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="760"
+          begin="5.5s"
+          dur="1.1s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="125"
-      y="216"
-      fill="#26b912">
-      :
+      x="75"
+      y="278"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="17"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip10)"
+      filter="url(#glow)">
+
+      "college"    : "Bapuji Institute of Engineering and Technology"
+
     </text>
+    
+
+  
+    <clipPath id="clip11">
+      <rect
+        x="75"
+        y="291"
+        width="0"
+        height="27">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="500"
+          begin="6.4s"
+          dur="0.9s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="145"
-      y="216"
-      fill="#39ff14">
-      "19 years, 10 months, 20 days"
+      x="75"
+      y="308"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="17"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip11)"
+      filter="url(#glow)">
+
+      "degree"     : "BE Computer Science"
+
     </text>
+    
 
+  
+    <clipPath id="clip12">
+      <rect
+        x="75"
+        y="321"
+        width="0"
+        height="27">
 
-    <!-- COLLEGE -->
+        <animate
+          attributeName="width"
+          from="0"
+          to="300"
+          begin="7.2s"
+          dur="0.8s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="62"
-      y="243"
-      fill="#39ff14">
-      "college"
+      x="75"
+      y="338"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="17"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip12)"
+      filter="url(#glow)">
+
+      "graduation" : 2028
+
     </text>
+    
+
+  
+    <clipPath id="clip13">
+      <rect
+        x="50"
+        y="350"
+        width="0"
+        height="28">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="30"
+          begin="8.0s"
+          dur="0.3s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
 
     <text
-      x="125"
-      y="243"
-      fill="#26b912">
-      :
-    </text>
+      x="50"
+      y="368"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip13)"
+      filter="url(#glow)">
 
-    <text
-      x="145"
-      y="243"
-      fill="#39ff14">
-      "Bapuji Institute of Engineering and Technology"
-    </text>
-
-
-    <!-- DEGREE -->
-
-    <text
-      x="62"
-      y="270"
-      fill="#39ff14">
-      "degree"
-    </text>
-
-    <text
-      x="125"
-      y="270"
-      fill="#26b912">
-      :
-    </text>
-
-    <text
-      x="145"
-      y="270"
-      fill="#39ff14">
-      "BE Computer Science"
-    </text>
-
-
-    <!-- GRADUATION -->
-
-    <text
-      x="62"
-      y="297"
-      fill="#39ff14">
-      "graduation"
-    </text>
-
-    <text
-      x="145"
-      y="297"
-      fill="#26b912">
-      :
-    </text>
-
-    <text
-      x="165"
-      y="297"
-      fill="#39ff14">
-      2028
-    </text>
-
-
-    <!-- Closing brace -->
-
-    <text
-      x="45"
-      y="320"
-      fill="#39ff14">
       &#125;
-    </text>
 
-  </g>
+    </text>
+    
 
 
   <!-- ====================================== -->
   <!-- STATUS -->
   <!-- ====================================== -->
 
-  <text
-    x="28"
-    y="357"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    font-size="13"
-    fill="#39ff14"
-    filter="url(#glow)">
-    &gt; status
-  </text>
+  
+    <clipPath id="clip14">
+      <rect
+        x="30"
+        y="384"
+        width="0"
+        height="28">
 
+        <animate
+          attributeName="width"
+          from="0"
+          to="150"
+          begin="9.0s"
+          dur="0.6s"
+          fill="freeze"
+          repeatCount="indefinite"/>
 
-  <text
-    x="105"
-    y="357"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    font-size="13"
-    fill="#39ff14"
-    filter="url(#glow)">
-    [ ONLINE ]
-  </text>
+      </rect>
+    </clipPath>
 
+    <text
+      x="30"
+      y="402"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip14)"
+      filter="url(#glow)">
 
-  <!-- CURSOR -->
+      &gt; status
 
-  <text
-    x="28"
-    y="385"
-    font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
-    font-size="13"
-    fill="#39ff14"
-    filter="url(#glow)">
-    &gt; _
-  </text>
+    </text>
+    
+
+  
+    <clipPath id="clip15">
+      <rect
+        x="155"
+        y="384"
+        width="0"
+        height="28">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="170"
+          begin="9.7s"
+          dur="0.7s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
+
+    <text
+      x="155"
+      y="402"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip15)"
+      filter="url(#glow)">
+
+      [ ONLINE ]
+
+    </text>
+    
+
+  
+    <clipPath id="clip16">
+      <rect
+        x="30"
+        y="412"
+        width="0"
+        height="28">
+
+        <animate
+          attributeName="width"
+          from="0"
+          to="50"
+          begin="10.5s"
+          dur="0.3s"
+          fill="freeze"
+          repeatCount="indefinite"/>
+
+      </rect>
+    </clipPath>
+
+    <text
+      x="30"
+      y="430"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
+      font-size="18"
+      font-weight="normal"
+      fill="#39ff14"
+      clip-path="url(#clip16)"
+      filter="url(#glow)">
+
+      &gt; _
+
+    </text>
+    
 
 </svg>
