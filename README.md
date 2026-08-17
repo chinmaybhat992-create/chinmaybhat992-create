@@ -1,7 +1,7 @@
 # 👋 Hi, I'm Chinmay Bhat
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/chinmaybhat992-create/chinmaybhat992-create/main/profile-card.gif" alt="Chinmay Bhat terminal profile">
+  <img src="https://raw.githubusercontent.com/chinmaybhat992-create/chinmaybhat992-create/main/profile-card.gif?v=1" alt="Chinmay Bhat terminal profile">
 </p>
 
 ## 🚀 About Me
