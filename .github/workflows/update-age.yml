@@ -65,12 +65,14 @@ jobs:
 
           if TODAY.day >= last_birthday.day:
               days = TODAY.day - last_birthday.day
+
           else:
               previous_month = TODAY.month - 1
 
               if previous_month == 0:
                   previous_month = 12
                   previous_year = TODAY.year - 1
+
               else:
                   previous_year = TODAY.year
 
@@ -165,6 +167,10 @@ jobs:
           PHOTO_H = 300
 
 
+          # ==========================================
+          # CREATE TERMINAL PHOTO
+          # ==========================================
+
           def create_terminal_photo():
 
               photo = Image.open(
@@ -218,6 +224,10 @@ jobs:
                   )
 
 
+              # --------------------------------------
+              # Resize
+              # --------------------------------------
+
               photo = photo.resize(
                   (PHOTO_W, PHOTO_H),
                   Image.Resampling.LANCZOS
@@ -231,7 +241,10 @@ jobs:
               gray = ImageOps.grayscale(photo)
 
 
+              # --------------------------------------
               # Moderate contrast
+              # --------------------------------------
+
               gray = ImageEnhance.Contrast(
                   gray
               ).enhance(1.25)
@@ -306,16 +319,24 @@ jobs:
                   width=18
               )
 
-              vignette = ImageFilter.GaussianBlur(
-                  vignette,
-                  radius=10
+              # Correct Pillow GaussianBlur usage
+              vignette = vignette.filter(
+                  ImageFilter.GaussianBlur(
+                      radius=10
+                  )
               )
+
+
+              # --------------------------------------
+              # Dark overlay
+              # --------------------------------------
 
               dark_overlay = Image.new(
                   "RGB",
                   (PHOTO_W, PHOTO_H),
                   (0, 0, 0)
               )
+
 
               photo = Image.composite(
                   dark_overlay,
@@ -565,7 +586,10 @@ jobs:
               visible.append("")
 
 
+              # --------------------------------------
               # Type one character at a time
+              # --------------------------------------
+
               for character_index in range(
                   1,
                   len(text) + 1
@@ -582,7 +606,10 @@ jobs:
                   frames.append(frame)
 
 
-              # Small pause after completing each line
+              # --------------------------------------
+              # Small pause after completed line
+              # --------------------------------------
+
               finished_frame = create_frame(
                   visible.copy()
               )
