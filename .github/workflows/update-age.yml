@@ -89,6 +89,7 @@ jobs:
 
           with open("profile.json", "w", encoding="utf-8") as file:
               json.dump(data, file, indent=2)
+
               file.write("\n")
 
 
@@ -106,57 +107,18 @@ jobs:
           # IMAGE SETTINGS
           # ==========================================
 
-          WIDTH = 900
+          WIDTH = 1000
           HEIGHT = 460
 
           BG = (13, 17, 23)
+
           WHITE = (240, 246, 252)
+
           MUTED = (139, 148, 158)
+
           GREEN = (63, 185, 80)
 
-
-          # ==========================================
-          # PHOTO SETTINGS
-          # ==========================================
-
-          PHOTO_X = 650
-          PHOTO_Y = 72
-
-          PHOTO_WIDTH = 220
-          PHOTO_HEIGHT = 300
-
-
-          # ==========================================
-          # LOAD AND PREPARE PHOTO
-          # ==========================================
-
-          photo = Image.open(
-              "profile-photo.jpg"
-          ).convert("RGB")
-
-          # Crop the photo to fit the terminal area.
-          photo = ImageOps.fit(
-              photo,
-              (PHOTO_WIDTH, PHOTO_HEIGHT),
-              method=Image.Resampling.LANCZOS,
-              centering=(0.5, 0.38)
-          )
-
-          # Give the photo a subtle terminal/CRT appearance.
-          grayscale = photo.convert("L")
-
-          photo = Image.merge(
-              "RGB",
-              (
-                  grayscale.point(lambda p: int(p * 0.55)),
-                  grayscale.point(lambda p: int(p * 0.95)),
-                  grayscale.point(lambda p: int(p * 0.55))
-              )
-          )
-
-          photo = ImageEnhance.Contrast(
-              photo
-          ).enhance(1.15)
+          DARK_GREEN = (30, 100, 45)
 
 
           # ==========================================
@@ -180,18 +142,152 @@ jobs:
 
           FONT_NORMAL = ImageFont.truetype(
               FONT_PATH,
-              17
-          )
-
-          FONT_JSON = ImageFont.truetype(
-              FONT_PATH,
-              15
+              18
           )
 
           FONT_LARGE = ImageFont.truetype(
               BOLD_FONT_PATH,
               27
           )
+
+
+          # ==========================================
+          # PHOTO PROCESSING
+          # ==========================================
+
+          PHOTO_X = 735
+          PHOTO_Y = 75
+          PHOTO_W = 220
+          PHOTO_H = 330
+
+
+          def create_terminal_photo():
+
+              photo = Image.open(
+                  "profile-photo.jpg"
+              ).convert("RGB")
+
+
+              # --------------------------------------
+              # Crop image to portrait
+              # --------------------------------------
+
+              photo_ratio = photo.width / photo.height
+              target_ratio = PHOTO_W / PHOTO_H
+
+              if photo_ratio > target_ratio:
+
+                  new_width = int(
+                      photo.height * target_ratio
+                  )
+
+                  left = (
+                      photo.width - new_width
+                  ) // 2
+
+                  photo = photo.crop(
+                      (
+                          left,
+                          0,
+                          left + new_width,
+                          photo.height
+                      )
+                  )
+
+              else:
+
+                  new_height = int(
+                      photo.width / target_ratio
+                  )
+
+                  top = (
+                      photo.height - new_height
+                  ) // 2
+
+                  photo = photo.crop(
+                      (
+                          0,
+                          top,
+                          photo.width,
+                          top + new_height
+                      )
+                  )
+
+
+              photo = photo.resize(
+                  (PHOTO_W, PHOTO_H),
+                  Image.Resampling.LANCZOS
+              )
+
+
+              # --------------------------------------
+              # Convert to monochrome
+              # --------------------------------------
+
+              gray = ImageOps.grayscale(photo)
+
+
+              # Increase contrast
+              gray = ImageEnhance.Contrast(
+                  gray
+              ).enhance(1.45)
+
+
+              # --------------------------------------
+              # Green terminal color
+              # --------------------------------------
+
+              photo = ImageOps.colorize(
+                  gray,
+                  black=(2, 8, 3),
+                  white=(70, 210, 90)
+              )
+
+
+              # --------------------------------------
+              # CRT scanlines
+              # --------------------------------------
+
+              draw = ImageDraw.Draw(photo)
+
+              for y in range(
+                  0,
+                  PHOTO_H,
+                  4
+              ):
+
+                  draw.line(
+                      (
+                          0,
+                          y,
+                          PHOTO_W,
+                          y
+                      ),
+                      fill=(5, 35, 12),
+                      width=1
+                  )
+
+
+              # --------------------------------------
+              # Dark terminal overlay
+              # --------------------------------------
+
+              overlay = Image.new(
+                  "RGBA",
+                  photo.size,
+                  (0, 20, 5, 35)
+              )
+
+              photo = Image.alpha_composite(
+                  photo.convert("RGBA"),
+                  overlay
+              )
+
+
+              return photo.convert("RGB")
+
+
+          terminal_photo = create_terminal_photo()
 
 
           # ==========================================
@@ -249,7 +345,7 @@ jobs:
 
           def create_frame(
               visible_text,
-              photo_progress=0
+              photo_height=0
           ):
 
               image = Image.new(
@@ -287,36 +383,6 @@ jobs:
                   fill=GREEN,
                   anchor="ra"
               )
-
-
-              # ======================================
-              # PHOTO REVEAL
-              # ======================================
-
-              if photo_progress > 0:
-
-                  visible_height = int(
-                      PHOTO_HEIGHT * photo_progress
-                  )
-
-                  if visible_height > 0:
-
-                      photo_crop = photo.crop(
-                          (
-                              0,
-                              0,
-                              PHOTO_WIDTH,
-                                                           visible_height
-                          )
-                      )
-
-                      image.paste(
-                          photo_crop,
-                          (
-                              PHOTO_X,
-                              PHOTO_Y
-                          )
-                      )
 
 
               # ======================================
@@ -359,9 +425,9 @@ jobs:
 
                   else:
 
-                      font = FONT_JSON
+                      font = FONT_NORMAL
                       color = WHITE
-                      spacing = 29
+                      spacing = 31
 
 
                   draw.text(
@@ -374,11 +440,40 @@ jobs:
                   y += spacing
 
 
+              # ======================================
+              # TERMINAL PHOTO
+              # ======================================
+
+              if photo_height > 0:
+
+                  visible_height = min(
+                      photo_height,
+                      PHOTO_H
+                  )
+
+                  photo_part = terminal_photo.crop(
+                      (
+                          0,
+                          0,
+                          PHOTO_W,
+                          visible_height
+                      )
+                  )
+
+                  image.paste(
+                      photo_part,
+                      (
+                          PHOTO_X,
+                          PHOTO_Y
+                      )
+                  )
+
+
               return image
 
 
           # ==========================================
-          # GENERATE ONE-SHOT TYPING ANIMATION
+          # GENERATE ONE-SHOT ANIMATION
           # ==========================================
 
           frames = []
@@ -391,15 +486,12 @@ jobs:
           # ==========================================
 
           frames.append(
-              create_frame(
-                  [],
-                  0
-              )
+              create_frame([])
           )
 
 
           # ==========================================
-          # TYPE FROM TOP TO BOTTOM
+          # TEXT TYPING
           # ==========================================
 
           for line_index, (text, kind) in enumerate(lines):
@@ -412,54 +504,35 @@ jobs:
               visible.append("")
 
 
-              # --------------------------------------
-              # PHOTO STARTS REVEALING AFTER WHOAMI
-              # --------------------------------------
-
-              if line_index >= 2:
-
-                  photo_progress = min(
-                      1,
-                      (line_index - 1) / 8
-                  )
-
-              else:
-
-                  photo_progress = 0
-
-
-              # Type one character at a time
-
               for character_index in range(
                   1,
                   len(text) + 1
               ):
 
-                  visible[-1] = text[:character_index]
+                  visible[-1] = text[
+                      :character_index
+                  ]
 
                   frame = create_frame(
-                      visible.copy(),
-                      photo_progress
+                      visible.copy()
                   )
 
                   frames.append(frame)
 
 
-              # Small pause after completed line
-
               finished_frame = create_frame(
-                  visible.copy(),
-                  photo_progress
+                  visible.copy()
               )
 
               for _ in range(2):
+
                   frames.append(
                       finished_frame
                   )
 
 
           # ==========================================
-          # PHOTO FINAL REVEAL
+          # PHOTO REVEAL
           # ==========================================
 
           completed_text = [
@@ -468,23 +541,19 @@ jobs:
           ]
 
 
-          # Reveal photo smoothly from top to bottom.
-
-          PHOTO_REVEAL_FRAMES = 18
-
-          for i in range(
-              1,
-              PHOTO_REVEAL_FRAMES + 1
+          # Reveal photo from TOP → BOTTOM
+          for height in range(
+              0,
+              PHOTO_H + 1,
+              8
           ):
 
-              progress = i / PHOTO_REVEAL_FRAMES
-
-              frames.append(
-                  create_frame(
-                      completed_text,
-                      progress
-                  )
+              frame = create_frame(
+                  completed_text,
+                  height
               )
+
+              frames.append(frame)
 
 
           # ==========================================
@@ -493,13 +562,12 @@ jobs:
 
           final_frame = create_frame(
               completed_text,
-              1
+              PHOTO_H
           )
 
 
-          # Hold final completed state
-
-          for _ in range(30):
+          # Hold final state
+          for _ in range(35):
 
               frames.append(
                   final_frame
@@ -514,7 +582,7 @@ jobs:
               "profile-card.gif",
               save_all=True,
               append_images=frames[1:],
-              duration=30,
+              duration=35,
               optimize=True
           )
 
