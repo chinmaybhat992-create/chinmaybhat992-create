@@ -17,7 +17,7 @@ jobs:
     steps:
 
       # ==========================================
-      # CHECKOUT REPOSITORY
+      # CHECKOUT
       # ==========================================
 
       - name: Checkout repository
@@ -39,16 +39,12 @@ jobs:
 
       - name: Update profile and generate terminal card
         run: |
+
           python3 << 'PY'
 
           import json
           from datetime import date
-          from PIL import (
-              Image,
-              ImageDraw,
-              ImageFont,
-              ImageFilter
-          )
+          from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 
           # ==========================================
@@ -88,12 +84,13 @@ jobs:
               if previous_month == 0:
                   previous_month = 12
                   previous_year = TODAY.year - 1
+
               else:
                   previous_year = TODAY.year
 
               days = (
-                  TODAY
-                  - date(
+                  TODAY -
+                  date(
                       previous_year,
                       previous_month,
                       last_birthday.day
@@ -145,7 +142,7 @@ jobs:
 
 
           # ==========================================
-          # TERMINAL SETTINGS
+          # CANVAS
           # ==========================================
 
           WIDTH = 900
@@ -161,14 +158,21 @@ jobs:
 
 
           # ==========================================
-          # PHOTO SETTINGS
+          # LAYOUT
           # ==========================================
 
-          PHOTO_X = 700
-          PHOTO_Y = 78
+          # Left side is reserved for terminal text.
+          TEXT_X = 30
 
-          PHOTO_WIDTH = 230
-          PHOTO_HEIGHT = 330
+          # Maximum width of text column.
+          TEXT_RIGHT = 665
+
+          # Right-side photo area.
+          PHOTO_X = 700
+          PHOTO_Y = 105
+
+          PHOTO_WIDTH = 165
+          PHOTO_HEIGHT = 270
 
 
           # ==========================================
@@ -184,6 +188,7 @@ jobs:
               "/usr/share/fonts/truetype/dejavu/"
               "DejaVuSansMono-Bold.ttf"
           )
+
 
           FONT_SMALL = ImageFont.truetype(
               FONT_PATH,
@@ -251,7 +256,7 @@ jobs:
 
 
           # ==========================================
-          # LOAD PROFILE PHOTO
+          # PREPARE PHOTO
           # ==========================================
 
           original_photo = Image.open(
@@ -259,10 +264,7 @@ jobs:
           ).convert("RGB")
 
 
-          # ==========================================
-          # RESIZE PHOTO
-          # ==========================================
-
+          # Resize while keeping the photo proportional.
           original_photo.thumbnail(
               (
                   PHOTO_WIDTH,
@@ -272,7 +274,8 @@ jobs:
           )
 
 
-          photo_base = Image.new(
+          # Create a dark canvas for the photo.
+          photo_canvas = Image.new(
               "RGB",
               (
                   PHOTO_WIDTH,
@@ -282,105 +285,85 @@ jobs:
           )
 
 
-          offset_x = (
-              PHOTO_WIDTH
-              - original_photo.width
+          # Center the resized photo.
+          photo_x = (
+              PHOTO_WIDTH -
+              original_photo.width
           ) // 2
 
-          offset_y = (
-              PHOTO_HEIGHT
-              - original_photo.height
+          photo_y = (
+              PHOTO_HEIGHT -
+              original_photo.height
           ) // 2
 
 
-          photo_base.paste(
+          photo_canvas.paste(
               original_photo,
               (
-                  offset_x,
-                  offset_y
+                  photo_x,
+                  photo_y
               )
           )
 
 
           # ==========================================
-          # CONVERT PHOTO TO GRAYSCALE
+          # TERMINAL PHOTO EFFECT
           # ==========================================
 
-          gray = photo_base.convert("L")
+          # Convert to grayscale.
+          photo_gray = photo_canvas.convert(
+              "L"
+          )
 
 
-          # ==========================================
-          # INCREASE CONTRAST
-          # ==========================================
+          # Increase contrast.
+          photo_gray = ImageEnhance.Contrast(
+              photo_gray
+          ).enhance(1.5)
 
-          gray = gray.point(
-              lambda p: min(
-                  255,
-                  max(
-                      0,
-                      int(
-                          (p - 128) * 1.35 + 128
+
+          # Convert grayscale into green terminal tones.
+          photo_terminal = Image.new(
+              "RGB",
+              photo_gray.size,
+              BG
+          )
+
+
+          pixels = photo_gray.load()
+          output = photo_terminal.load()
+
+
+          for y in range(
+              photo_gray.height
+          ):
+
+              for x in range(
+                  photo_gray.width
+              ):
+
+                  value = pixels[x, y]
+
+                  # Green monochrome terminal palette.
+                  green_value = int(
+                      value * 0.75
+                  )
+
+                  output[x, y] = (
+                      10,
+                      green_value,
+                      30 + int(
+                          value * 0.15
                       )
                   )
-              )
-          )
 
 
           # ==========================================
-          # GREEN TERMINAL COLOR
+          # SCANLINES
           # ==========================================
 
-          dark_green = Image.new(
-              "RGB",
-              gray.size,
-              (0, 45, 12)
-          )
-
-          bright_green = Image.new(
-              "RGB",
-              gray.size,
-              (70, 220, 95)
-          )
-
-
-          photo = Image.composite(
-              bright_green,
-              dark_green,
-              gray
-          )
-
-
-          # ==========================================
-          # DARK OVERLAY
-          # ==========================================
-
-          photo = photo.convert("RGBA")
-
-
-          dark_overlay = Image.new(
-              "RGBA",
-              photo.size,
-              (0, 0, 0, 70)
-          )
-
-
-          photo.alpha_composite(
-              dark_overlay
-          )
-
-
-          # ==========================================
-          # TERMINAL SCANLINES
-          # ==========================================
-
-          scanlines = Image.new(
-              "RGBA",
-              photo.size,
-              (0, 0, 0, 0)
-          )
-
-          scan_draw = ImageDraw.Draw(
-              scanlines
+          draw_photo = ImageDraw.Draw(
+              photo_terminal
           )
 
 
@@ -390,37 +373,31 @@ jobs:
               4
           ):
 
-              scan_draw.line(
+              draw_photo.line(
                   (
                       0,
                       y,
                       PHOTO_WIDTH,
                       y
                   ),
-                  fill=(0, 0, 0, 85),
+                  fill=(5, 35, 15),
                   width=1
               )
 
 
-          photo.alpha_composite(
-              scanlines
-          )
-
-
           # ==========================================
-          # SOFT TERMINAL GLOW
+          # PHOTO BORDER
           # ==========================================
 
-          glow = photo.filter(
-              ImageFilter.GaussianBlur(
-                  radius=2
-              )
-          )
-
-          glow.putalpha(35)
-
-          photo.alpha_composite(
-              glow
+          draw_photo.rectangle(
+              (
+                  0,
+                  0,
+                  PHOTO_WIDTH - 1,
+                  PHOTO_HEIGHT - 1
+              ),
+              outline=(30, 110, 45),
+              width=1
           )
 
 
@@ -428,55 +405,49 @@ jobs:
           # PHOTO REVEAL
           # ==========================================
 
-          def create_photo_layer(
+          def add_photo(
+              image,
               reveal_progress
           ):
 
-              layer = Image.new(
-                  "RGBA",
+              if reveal_progress <= 0:
+                  return image
+
+              reveal_progress = max(
+                  0,
+                  min(
+                      1,
+                      reveal_progress
+                  )
+              )
+
+              visible_width = int(
+                  PHOTO_WIDTH *
+                  reveal_progress
+              )
+
+              if visible_width <= 0:
+                  return image
+
+              # Create a clean cropped section.
+              visible_photo = photo_terminal.crop(
                   (
-                      PHOTO_WIDTH,
+                      0,
+                      0,
+                      visible_width,
                       PHOTO_HEIGHT
-                  ),
-                  (
-                      0,
-                      0,
-                      0,
-                      0
                   )
               )
 
-
-              reveal_height = int(
-                  PHOTO_HEIGHT
-                  * reveal_progress
-              )
-
-
-              if reveal_height <= 0:
-                  return layer
-
-
-              visible_photo = photo.crop(
-                  (
-                      0,
-                      0,
-                      PHOTO_WIDTH,
-                      reveal_height
-                  )
-              )
-
-
-              layer.alpha_composite(
+              image.paste(
                   visible_photo,
                   (
-                      0,
-                      0
+                      PHOTO_X,
+                      PHOTO_Y
                   )
               )
 
-
-              return layer
+              return image
 
 
           # ==========================================
@@ -485,49 +456,26 @@ jobs:
 
           def create_frame(
               visible_text,
-              photo_progress
+              photo_progress=0
           ):
 
               image = Image.new(
-                  "RGBA",
+                  "RGB",
                   (
                       WIDTH,
                       HEIGHT
                   ),
-                  BG + (255,)
+                  BG
               )
-
-
-              # ======================================
-              # PHOTO
-              # ======================================
-
-              photo_layer = create_photo_layer(
-                  photo_progress
-              )
-
-
-              # IMPORTANT:
-              # Place the smaller photo layer
-              # inside the larger terminal canvas.
-
-              image.alpha_composite(
-                  photo_layer,
-                  (
-                      PHOTO_X,
-                      PHOTO_Y
-                  )
-              )
-
-
-              # ======================================
-              # TERMINAL HEADER
-              # ======================================
 
               draw = ImageDraw.Draw(
                   image
               )
 
+
+              # ======================================
+              # HEADER
+              # ======================================
 
               draw.text(
                   (28, 20),
@@ -558,6 +506,16 @@ jobs:
                   font=FONT_SMALL,
                   fill=GREEN,
                   anchor="ra"
+              )
+
+
+              # ======================================
+              # PHOTO
+              # ======================================
+
+              add_photo(
+                  image,
+                  photo_progress
               )
 
 
@@ -612,9 +570,50 @@ jobs:
                       spacing = 31
 
 
+                  # ==================================
+                  # TEXT WIDTH PROTECTION
+                  # ==================================
+
+                  # Prevent long lines from entering
+                  # the reserved photo area.
+
+                  max_width = (
+                      TEXT_RIGHT -
+                      TEXT_X
+                  )
+
+
+                  # For normal JSON text, use the
+                  # terminal's fixed-width font.
+                  #
+                  # If a line is too long, reduce
+                  # its visible length rather than
+                  # allowing overlap.
+
+                  if (
+                      draw.textlength(
+                          current_text,
+                          font=font
+                      ) > max_width
+                  ):
+
+                      while (
+                          len(current_text) > 0
+                          and
+                          draw.textlength(
+                              current_text,
+                              font=font
+                          ) > max_width
+                      ):
+
+                          current_text = (
+                              current_text[:-1]
+                          )
+
+
                   draw.text(
                       (
-                          30,
+                          TEXT_X,
                           y
                       ),
                       current_text,
@@ -626,18 +625,18 @@ jobs:
                   y += spacing
 
 
-              return image.convert("RGB")
+              return image
 
 
           # ==========================================
-          # ANIMATION SETTINGS
+          # GENERATE ANIMATION
           # ==========================================
 
           frames = []
 
-          FRAMES_PER_CHARACTER = 1
 
-          NAME_INDEX = 1
+          # Faster typing.
+          FRAMES_PER_CHARACTER = 1
 
 
           # ==========================================
@@ -647,44 +646,19 @@ jobs:
           frames.append(
               create_frame(
                   [],
-                  0.0
+                  0
               )
           )
 
 
           # ==========================================
-          # CALCULATE PHOTO REVEAL RANGE
+          # TYPE FROM TOP TO BOTTOM
           # ==========================================
 
-          characters_after_name = sum(
-              len(text)
-              for index, (text, kind) in enumerate(lines)
-              if index >= NAME_INDEX
-          )
+          for line_index, (text, kind) in enumerate(lines):
 
 
-          photo_step = (
-              1.0
-              / max(
-                  1,
-                  characters_after_name
-              )
-          )
-
-
-          photo_progress = 0.0
-
-
-          # ==========================================
-          # TYPE TEXT + REVEAL PHOTO
-          # ==========================================
-
-          for line_index, (
-              text,
-              kind
-          ) in enumerate(lines):
-
-
+              # Already completed lines.
               visible = [
                   lines[i][0]
                   for i in range(
@@ -696,32 +670,46 @@ jobs:
               visible.append("")
 
 
-              # --------------------------------------
-              # TYPE CURRENT LINE
-              # --------------------------------------
+              # ======================================
+              # CHARACTER-BY-CHARACTER ANIMATION
+              # ======================================
 
               for character_index in range(
                   1,
                   len(text) + 1
               ):
 
-                  visible[-1] = text[
-                      :character_index
-                  ]
+                  visible[-1] = (
+                      text[
+                          :character_index
+                      ]
+                  )
 
 
-                  # ------------------------------------
-                  # START PHOTO WHEN NAME STARTS
-                  # ------------------------------------
+                  # ==================================
+                  # PHOTO PARALLEL ANIMATION
+                  # ==================================
 
-                  if line_index >= NAME_INDEX:
+                  photo_progress = 0
 
-                      photo_progress += photo_step
 
-                      photo_progress = min(
-                          1.0,
-                          photo_progress
+                  # Start revealing the photo when
+                  # "Chinmay Bhat" begins typing.
+
+                  if kind == "name":
+
+                      photo_progress = (
+                          character_index /
+                          len(text)
                       )
+
+
+                  # If the name has already completed,
+                  # keep the photo visible.
+
+                  elif line_index > 1:
+
+                      photo_progress = 1
 
 
                   frame = create_frame(
@@ -735,13 +723,29 @@ jobs:
                   )
 
 
-              # --------------------------------------
-              # SMALL PAUSE AFTER EACH LINE
-              # --------------------------------------
+                  # ==================================
+                  # FRAME RATE
+                  # ==================================
+
+                  for _ in range(
+                      FRAMES_PER_CHARACTER - 1
+                  ):
+
+                      frames.append(
+                          frame
+                      )
+
+
+              # ======================================
+              # PAUSE AFTER EACH LINE
+              # ======================================
 
               finished_frame = create_frame(
                   visible.copy(),
-                  photo_progress
+                  1 if line_index > 1 else (
+                      1 if kind == "name"
+                      else 0
+                  )
               )
 
 
@@ -761,15 +765,12 @@ jobs:
                   line[0]
                   for line in lines
               ],
-              1.0
+              1
           )
 
 
-          # ==========================================
-          # HOLD FINAL STATE
-          # ==========================================
-
-          for _ in range(30):
+          # Hold final state.
+          for _ in range(35):
 
               frames.append(
                   final_frame
@@ -780,31 +781,27 @@ jobs:
           # SAVE GIF
           # ==========================================
 
+          # IMPORTANT:
+          # Do NOT use loop=0.
+          #
+          # loop=0 means infinite looping.
+          #
+          # By leaving loop unspecified, the GIF
+          # plays once and stops on the final frame.
+
           frames[0].save(
               "profile-card.gif",
               save_all=True,
               append_images=frames[1:],
               duration=35,
-              loop=0,
               optimize=True
           )
 
 
-          # ==========================================
-          # LOG
-          # ==========================================
-
-          print(
-              f"Generated {len(frames)} frames."
-          )
-
-          print(
-              f"Updated age: {age}"
-          )
-
           print(
               "Terminal profile card generated successfully."
           )
+
 
           PY
 
