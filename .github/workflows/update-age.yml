@@ -91,6 +91,7 @@ jobs:
               if previous_month == 0:
                   previous_month = 12
                   previous_year = TODAY.year - 1
+
               else:
                   previous_year = TODAY.year
 
@@ -167,18 +168,23 @@ jobs:
           # LAYOUT
           # ==========================================
 
-          # Text starts here.
-
           TEXT_X = 30
-
-
-          # Photo position.
 
           PHOTO_X = 710
           PHOTO_Y = 105
 
           PHOTO_WIDTH = 160
           PHOTO_HEIGHT = 270
+
+
+          # ==========================================
+          # PHOTO ANIMATION SETTINGS
+          # ==========================================
+
+          # Number of frames used to reveal the
+          # photo from TOP → BOTTOM.
+
+          PHOTO_REVEAL_FRAMES = 72
 
 
           # ==========================================
@@ -270,9 +276,6 @@ jobs:
           ).convert("RGB")
 
 
-          # Crop the photo into the terminal portrait
-          # shape.
-
           original_photo = ImageOps.fit(
               original_photo,
               (
@@ -297,8 +300,6 @@ jobs:
               photo_gray
           ).enhance(1.35)
 
-
-          # Green monochrome terminal effect.
 
           photo_terminal = ImageOps.colorize(
               photo_gray,
@@ -357,11 +358,12 @@ jobs:
               )
 
 
-              # IMPORTANT:
+              # Full width.
               #
-              # Width stays FULL.
+              # Only the HEIGHT changes.
               #
-              # Height grows from TOP to BOTTOM.
+              # This creates the TOP → BOTTOM
+              # terminal-style reveal.
 
               visible_height = int(
                   PHOTO_HEIGHT * progress
@@ -392,7 +394,7 @@ jobs:
 
 
           # ==========================================
-          # CREATE FRAME
+          # FRAME RENDERER
           # ==========================================
 
           def create_frame(
@@ -589,20 +591,41 @@ jobs:
 
                   if kind == "name":
 
-                      # Photo starts exactly when
-                      # the name starts typing.
+                      # The photo starts when the
+                      # name starts typing.
 
-                      photo_progress = (
+                      #
+                      # Unlike before, the photo
+                      # does NOT finish with the name.
+                      #
+                      # It progresses independently
+                      # and much more slowly.
+
+                      photo_progress = min(
+                          1,
                           character_index /
-                          len(text)
+                          PHOTO_REVEAL_FRAMES
                       )
+
 
                   elif line_index > 1:
 
-                      # After the name has completed,
-                      # keep the photo fully visible.
+                      # Keep the current progress
+                      # while the remaining terminal
+                      # text is being generated.
 
-                      photo_progress = 1
+                      photo_progress = min(
+                          1,
+                          (
+                              len(frames)
+                              /
+                              (
+                                  PHOTO_REVEAL_FRAMES
+                                  * 1.0
+                              )
+                          )
+                      )
+
 
                   else:
 
@@ -624,17 +647,20 @@ jobs:
               # PAUSE AFTER CURRENT LINE
               # ======================================
 
-              if kind == "name":
+              # Keep calculating the photo progress
+              # based on elapsed animation frames.
 
-                  photo_progress = 1
-
-              elif line_index > 1:
+              if len(frames) >= PHOTO_REVEAL_FRAMES:
 
                   photo_progress = 1
 
               else:
 
-                  photo_progress = 0
+                  photo_progress = min(
+                      1,
+                      len(frames) /
+                      PHOTO_REVEAL_FRAMES
+                  )
 
 
               finished_frame = create_frame(
@@ -651,7 +677,7 @@ jobs:
 
 
           # ==========================================
-          # FINAL FRAME
+          # ENSURE PHOTO IS FULLY REVEALED
           # ==========================================
 
           final_frame = create_frame(
@@ -663,7 +689,9 @@ jobs:
           )
 
 
-          # Keep the completed card visible.
+          # ==========================================
+          # HOLD FINAL FRAME
+          # ==========================================
 
           for _ in range(35):
 
@@ -678,12 +706,15 @@ jobs:
 
           # IMPORTANT:
           #
-          # There is intentionally NO loop=0.
-          #
           # loop=0 means infinite looping.
           #
-          # The GIF therefore plays once and ends
-          # on the completed terminal frame.
+          # loop=1 means repeat once.
+          #
+          # We want the animation to play only once,
+          # so loop=1 is intentionally NOT used here.
+          #
+          # Leaving loop unspecified makes the GIF
+          # stop at the final frame.
 
           frames[0].save(
               "profile-card.gif",
@@ -696,6 +727,14 @@ jobs:
 
           print(
               "Terminal profile card generated successfully."
+          )
+
+          print(
+              f"Generated {len(frames)} frames."
+          )
+
+          print(
+              f"Updated age: {age}"
           )
 
 
@@ -716,6 +755,6 @@ jobs:
           git add profile.json profile-card.gif
 
           git diff --cached --quiet || \
-            git commit -m "Update profile"
+              git commit -m "Update profile"
 
           git push
