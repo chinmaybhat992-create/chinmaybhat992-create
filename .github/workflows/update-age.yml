@@ -91,7 +91,6 @@ jobs:
               if previous_month == 0:
                   previous_month = 12
                   previous_year = TODAY.year - 1
-
               else:
                   previous_year = TODAY.year
 
@@ -178,13 +177,15 @@ jobs:
 
 
           # ==========================================
-          # PHOTO ANIMATION SETTINGS
+          # ANIMATION SETTINGS
           # ==========================================
 
-          # Number of frames used to reveal the
-          # photo from TOP → BOTTOM.
+          # Text typing speed.
 
-          PHOTO_REVEAL_FRAMES = 72
+          FRAME_DURATION = 35
+
+          # The photo begins when the name begins.
+          NAME_INDEX = 1
 
 
           # ==========================================
@@ -358,13 +359,6 @@ jobs:
               )
 
 
-              # Full width.
-              #
-              # Only the HEIGHT changes.
-              #
-              # This creates the TOP → BOTTOM
-              # terminal-style reveal.
-
               visible_height = int(
                   PHOTO_HEIGHT * progress
               )
@@ -399,7 +393,7 @@ jobs:
 
           def create_frame(
               visible_text,
-              photo_progress=0
+              photo_progress
           ):
 
               image = Image.new(
@@ -484,13 +478,11 @@ jobs:
                       color = WHITE
                       spacing = 45
 
-
                   elif kind == "muted":
 
                       font = FONT_SMALL
                       color = MUTED
                       spacing = 31
-
 
                   elif kind == "command":
 
@@ -498,13 +490,11 @@ jobs:
                       color = GREEN
                       spacing = 32
 
-
                   elif kind == "online":
 
                       font = FONT_NORMAL
                       color = GREEN
                       spacing = 32
-
 
                   else:
 
@@ -531,6 +521,46 @@ jobs:
 
 
           # ==========================================
+          # DETERMINE PHOTO TIMELINE
+          # ==========================================
+
+          # The photo starts when the name starts.
+          #
+          # It should NOT finish with the name.
+          #
+          # Instead, it should finish around the same
+          # time as the terminal text animation.
+
+          #
+          # First calculate how many character frames
+          # exist from the name until the end.
+
+          remaining_character_frames = 0
+
+
+          for index in range(
+              NAME_INDEX,
+              len(lines)
+          ):
+
+              remaining_character_frames += len(
+                  lines[index][0]
+              )
+
+              # Add the small pause after each line.
+
+              remaining_character_frames += 2
+
+
+          # Prevent division by zero.
+
+          remaining_character_frames = max(
+              1,
+              remaining_character_frames
+          )
+
+
+          # ==========================================
           # GENERATE ANIMATION
           # ==========================================
 
@@ -550,13 +580,21 @@ jobs:
 
 
           # ==========================================
-          # TYPE TERMINAL FROM TOP TO BOTTOM
+          # PHOTO TIMELINE COUNTER
           # ==========================================
 
-          for line_index, (text, kind) in enumerate(lines):
+          photo_frame_counter = 0
 
 
-              # Already completed lines.
+          # ==========================================
+          # TYPE TERMINAL
+          # ==========================================
+
+          for line_index, (
+              text,
+              kind
+          ) in enumerate(lines):
+
 
               visible = [
                   lines[i][0]
@@ -570,7 +608,7 @@ jobs:
 
 
               # ======================================
-              # TYPE CURRENT LINE
+              # CURRENT LINE TYPING
               # ======================================
 
               for character_index in range(
@@ -586,50 +624,24 @@ jobs:
 
 
                   # ==================================
-                  # PHOTO ANIMATION
+                  # PHOTO TIMELINE
                   # ==================================
 
-                  if kind == "name":
+                  if line_index >= NAME_INDEX:
 
-                      # The photo starts when the
-                      # name starts typing.
+                      photo_frame_counter += 1
 
-                      #
-                      # Unlike before, the photo
-                      # does NOT finish with the name.
-                      #
-                      # It progresses independently
-                      # and much more slowly.
 
                       photo_progress = min(
-                          1,
-                          character_index /
-                          PHOTO_REVEAL_FRAMES
+                          1.0,
+                          photo_frame_counter
+                          /
+                          remaining_character_frames
                       )
-
-
-                  elif line_index > 1:
-
-                      # Keep the current progress
-                      # while the remaining terminal
-                      # text is being generated.
-
-                      photo_progress = min(
-                          1,
-                          (
-                              len(frames)
-                              /
-                              (
-                                  PHOTO_REVEAL_FRAMES
-                                  * 1.0
-                              )
-                          )
-                      )
-
 
                   else:
 
-                      photo_progress = 0
+                      photo_progress = 0.0
 
 
                   frame = create_frame(
@@ -644,23 +656,24 @@ jobs:
 
 
               # ======================================
-              # PAUSE AFTER CURRENT LINE
+              # PAUSE AFTER LINE
               # ======================================
 
-              # Keep calculating the photo progress
-              # based on elapsed animation frames.
+              if line_index >= NAME_INDEX:
 
-              if len(frames) >= PHOTO_REVEAL_FRAMES:
+                  photo_frame_counter += 2
 
-                  photo_progress = 1
+
+                  photo_progress = min(
+                      1.0,
+                      photo_frame_counter
+                      /
+                      remaining_character_frames
+                  )
 
               else:
 
-                  photo_progress = min(
-                      1,
-                      len(frames) /
-                      PHOTO_REVEAL_FRAMES
-                  )
+                  photo_progress = 0.0
 
 
               finished_frame = create_frame(
@@ -677,7 +690,7 @@ jobs:
 
 
           # ==========================================
-          # ENSURE PHOTO IS FULLY REVEALED
+          # FINAL FRAME
           # ==========================================
 
           final_frame = create_frame(
@@ -685,7 +698,7 @@ jobs:
                   line[0]
                   for line in lines
               ],
-              1
+              1.0
           )
 
 
@@ -704,26 +717,21 @@ jobs:
           # SAVE GIF
           # ==========================================
 
-          # IMPORTANT:
-          #
-          # loop=0 means infinite looping.
-          #
-          # loop=1 means repeat once.
-          #
-          # We want the animation to play only once,
-          # so loop=1 is intentionally NOT used here.
-          #
-          # Leaving loop unspecified makes the GIF
-          # stop at the final frame.
+          # No loop parameter means the animation
+          # plays once and stops at the final frame.
 
           frames[0].save(
               "profile-card.gif",
               save_all=True,
               append_images=frames[1:],
-              duration=35,
+              duration=FRAME_DURATION,
               optimize=True
           )
 
+
+          # ==========================================
+          # LOG
+          # ==========================================
 
           print(
               "Terminal profile card generated successfully."
@@ -735,6 +743,11 @@ jobs:
 
           print(
               f"Updated age: {age}"
+          )
+
+          print(
+              "Photo animation is synchronized with "
+              "the terminal text timeline."
           )
 
 
