@@ -32,7 +32,8 @@ jobs:
               ImageDraw,
               ImageFont,
               ImageEnhance,
-              ImageOps
+              ImageOps,
+              ImageFilter
           )
 
 
@@ -305,7 +306,7 @@ jobs:
                   width=18
               )
 
-              vignette = ImageOps.GaussianBlur(
+              vignette = ImageFilter.GaussianBlur(
                   vignette,
                   radius=10
               )
