@@ -50,7 +50,8 @@ jobs:
               ImageDraw,
               ImageFont,
               ImageEnhance,
-              ImageOps
+              ImageOps,
+              ImageFilter
           )
 
 
@@ -90,7 +91,8 @@ jobs:
 
               if previous_month == 0:
                   previous_month = 12
-                  previous_year = TODAY.year - 1
+                  previous_year = TODAY.year
+
               else:
                   previous_year = TODAY.year
 
@@ -164,27 +166,34 @@ jobs:
 
 
           # ==========================================
-          # LAYOUT
+          # TEXT LAYOUT
           # ==========================================
 
           TEXT_X = 30
 
-          PHOTO_X = 710
-          PHOTO_Y = 105
 
-          PHOTO_WIDTH = 160
-          PHOTO_HEIGHT = 270
+          # ==========================================
+          # PHOTO LAYOUT
+          # ==========================================
+
+          # Smaller and more subtle than the previous
+          # version.
+
+          PHOTO_X = 735
+          PHOTO_Y = 125
+
+          PHOTO_WIDTH = 125
+          PHOTO_HEIGHT = 215
 
 
           # ==========================================
           # ANIMATION SETTINGS
           # ==========================================
 
-          # Text typing speed.
-
           FRAME_DURATION = 35
 
-          # The photo begins when the name begins.
+          # Photo begins when the name begins.
+
           NAME_INDEX = 1
 
 
@@ -289,7 +298,7 @@ jobs:
 
 
           # ==========================================
-          # TERMINAL PHOTO EFFECT
+          # CONVERT PHOTO INTO TERMINAL STYLE
           # ==========================================
 
           photo_gray = ImageOps.grayscale(
@@ -299,13 +308,18 @@ jobs:
 
           photo_gray = ImageEnhance.Contrast(
               photo_gray
-          ).enhance(1.35)
+          ).enhance(1.30)
+
+
+          photo_gray = ImageEnhance.Brightness(
+              photo_gray
+          ).enhance(0.88)
 
 
           photo_terminal = ImageOps.colorize(
               photo_gray,
-              black=(4, 15, 7),
-              white=(55, 210, 75)
+              black=(3, 12, 6),
+              white=(48, 175, 62)
           )
 
 
@@ -321,7 +335,7 @@ jobs:
           for y in range(
               0,
               PHOTO_HEIGHT,
-              4
+              5
           ):
 
               photo_draw.line(
@@ -331,14 +345,108 @@ jobs:
                       PHOTO_WIDTH,
                       y
                   ),
-                  fill=(5, 55, 18),
+                  fill=(5, 45, 16),
                   width=1
               )
 
 
           # ==========================================
+          # PHOTO SOFT EDGE MASK
+          # ==========================================
+
+          # Creates the faded terminal/hologram look
+          # instead of a hard rectangular image.
+
+          def create_soft_mask(
+              width,
+              height
+          ):
+
+              mask = Image.new(
+                  "L",
+                  (
+                      width,
+                      height
+                  ),
+                  0
+              )
+
+
+              pixels = mask.load()
+
+
+              edge_x = max(
+                  1,
+                  int(width * 0.18)
+              )
+
+              edge_y = max(
+                  1,
+                  int(height * 0.12)
+              )
+
+
+              for y in range(height):
+
+                  for x in range(width):
+
+                      horizontal = min(
+                          x,
+                          width - 1 - x
+                      )
+
+                      vertical = min(
+                          y,
+                          height - 1 - y
+                      )
+
+
+                      horizontal_factor = min(
+                          1.0,
+                          horizontal / edge_x
+                      )
+
+
+                      vertical_factor = min(
+                          1.0,
+                          vertical / edge_y
+                      )
+
+
+                      alpha = int(
+                          255 *
+                          horizontal_factor *
+                          vertical_factor
+                      )
+
+
+                      # Keep the center slightly transparent.
+                      alpha = int(
+                          alpha * 0.78
+                      )
+
+
+                      pixels[x, y] = alpha
+
+
+              # Smooth the mask.
+
+              mask = mask.filter(
+                  ImageFilter.GaussianBlur(2)
+              )
+
+
+              return mask
+
+
+          PHOTO_MASK = create_soft_mask(
+              PHOTO_WIDTH,
+              PHOTO_HEIGHT
+          )
+
+
+          # ==========================================
           # PHOTO REVEAL
-          # TOP → BOTTOM
           # ==========================================
 
           def paste_photo(
@@ -351,9 +459,9 @@ jobs:
 
 
               progress = max(
-                  0,
+                  0.0,
                   min(
-                      1,
+                      1.0,
                       progress
                   )
               )
@@ -368,6 +476,10 @@ jobs:
                   return
 
 
+              # ======================================
+              # CROP TOP → BOTTOM
+              # ======================================
+
               visible_photo = photo_terminal.crop(
                   (
                       0,
@@ -378,12 +490,139 @@ jobs:
               )
 
 
-              image.paste(
+              visible_mask = PHOTO_MASK.crop(
+                  (
+                      0,
+                      0,
+                      PHOTO_WIDTH,
+                      visible_height
+                  )
+              )
+
+
+              # ======================================
+              # VERY SUBTLE GREEN GLOW
+              # ======================================
+
+              glow_mask = visible_mask.filter(
+                  ImageFilter.GaussianBlur(8)
+              )
+
+
+              glow_alpha = glow_mask.point(
+                  lambda value: int(
+                      value * 0.12
+                  )
+              )
+
+
+              glow = Image.new(
+                  "RGBA",
+                  (
+                      PHOTO_WIDTH,
+                      visible_height
+                  ),
+                  (63, 185, 80, 0)
+              )
+
+
+              glow.putalpha(
+                  glow_alpha
+              )
+
+
+              # ======================================
+              # PHOTO ALPHA
+              # ======================================
+
+              visible_photo = (
+                  visible_photo.convert("RGBA")
+              )
+
+
+              visible_photo.putalpha(
+                  visible_mask
+              )
+
+
+              # ======================================
+              # COMPOSITE GLOW
+              # ======================================
+
+              image_rgba = image.convert(
+                  "RGBA"
+              )
+
+
+              image_rgba.alpha_composite(
+                  glow,
+                  (
+                      PHOTO_X,
+                      PHOTO_Y
+                  )
+              )
+
+
+              # ======================================
+              # COMPOSITE PHOTO
+              # ======================================
+
+              image_rgba.alpha_composite(
                   visible_photo,
                   (
                       PHOTO_X,
                       PHOTO_Y
                   )
+              )
+
+
+              # ======================================
+              # VERY SUBTLE TERMINAL FRAME
+              # ======================================
+
+              if progress >= 1.0:
+
+                  frame_layer = Image.new(
+                      "RGBA",
+                      image_rgba.size,
+                      (0, 0, 0, 0)
+                  )
+
+
+                  frame_draw = ImageDraw.Draw(
+                      frame_layer
+                  )
+
+
+                  frame_draw.rectangle(
+                      (
+                          PHOTO_X - 2,
+                          PHOTO_Y - 2,
+                          PHOTO_X + PHOTO_WIDTH + 1,
+                          PHOTO_Y + PHOTO_HEIGHT + 1
+                      ),
+                      outline=(
+                          63,
+                          185,
+                          80,
+                          28
+                      ),
+                      width=1
+                  )
+
+
+                  frame_layer = frame_layer.filter(
+                      ImageFilter.GaussianBlur(0.5)
+                  )
+
+
+                  image_rgba.alpha_composite(
+                      frame_layer
+                  )
+
+
+              image.paste(
+                  image_rgba.convert("RGB")
               )
 
 
@@ -404,6 +643,7 @@ jobs:
                   ),
                   BG
               )
+
 
               draw = ImageDraw.Draw(
                   image
@@ -478,11 +718,13 @@ jobs:
                       color = WHITE
                       spacing = 45
 
+
                   elif kind == "muted":
 
                       font = FONT_SMALL
                       color = MUTED
                       spacing = 31
+
 
                   elif kind == "command":
 
@@ -490,11 +732,13 @@ jobs:
                       color = GREEN
                       spacing = 32
 
+
                   elif kind == "online":
 
                       font = FONT_NORMAL
                       color = GREEN
                       spacing = 32
+
 
                   else:
 
@@ -524,17 +768,6 @@ jobs:
           # DETERMINE PHOTO TIMELINE
           # ==========================================
 
-          # The photo starts when the name starts.
-          #
-          # It should NOT finish with the name.
-          #
-          # Instead, it should finish around the same
-          # time as the terminal text animation.
-
-          #
-          # First calculate how many character frames
-          # exist from the name until the end.
-
           remaining_character_frames = 0
 
 
@@ -547,12 +780,8 @@ jobs:
                   lines[index][0]
               )
 
-              # Add the small pause after each line.
-
               remaining_character_frames += 2
 
-
-          # Prevent division by zero.
 
           remaining_character_frames = max(
               1,
@@ -574,13 +803,13 @@ jobs:
           frames.append(
               create_frame(
                   [],
-                  0
+                  0.0
               )
           )
 
 
           # ==========================================
-          # PHOTO TIMELINE COUNTER
+          # PHOTO TIMELINE
           # ==========================================
 
           photo_frame_counter = 0
@@ -608,7 +837,7 @@ jobs:
 
 
               # ======================================
-              # CURRENT LINE TYPING
+              # TYPE CURRENT LINE
               # ======================================
 
               for character_index in range(
@@ -717,9 +946,6 @@ jobs:
           # SAVE GIF
           # ==========================================
 
-          # No loop parameter means the animation
-          # plays once and stops at the final frame.
-
           frames[0].save(
               "profile-card.gif",
               save_all=True,
@@ -746,8 +972,8 @@ jobs:
           )
 
           print(
-              "Photo animation is synchronized with "
-              "the terminal text timeline."
+              "Photo reveal synchronized with "
+              "terminal text animation."
           )
 
 
