@@ -179,11 +179,11 @@ jobs:
           # Smaller and more subtle than the previous
           # version.
 
-          PHOTO_X = 735
-          PHOTO_Y = 125
+          PHOTO_X = 710
+          PHOTO_Y = 108
 
-          PHOTO_WIDTH = 125
-          PHOTO_HEIGHT = 215
+          PHOTO_WIDTH = 155
+          PHOTO_HEIGHT = 250
 
 
           # ==========================================
