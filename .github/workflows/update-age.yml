@@ -72,7 +72,6 @@ jobs:
               if previous_month == 0:
                   previous_month = 12
                   previous_year = TODAY.year - 1
-
               else:
                   previous_year = TODAY.year
 
@@ -271,7 +270,7 @@ jobs:
 
 
               # --------------------------------------
-              # Subtle CRT scanlines
+              # CRT scanlines
               # --------------------------------------
 
               draw = ImageDraw.Draw(photo)
@@ -295,32 +294,31 @@ jobs:
 
 
               # --------------------------------------
-              # Subtle terminal vignette
+              # Soft edge fade
               # --------------------------------------
 
-              vignette = Image.new(
+              fade = 32
+
+              mask = Image.new(
                   "L",
                   (PHOTO_W, PHOTO_H),
                   0
               )
 
-              vignette_draw = ImageDraw.Draw(
-                  vignette
-              )
+              mask_draw = ImageDraw.Draw(mask)
 
-              vignette_draw.rectangle(
+              mask_draw.rectangle(
                   (
-                      0,
-                      0,
-                      PHOTO_W - 1,
-                      PHOTO_H - 1
+                      fade,
+                      fade,
+                      PHOTO_W - fade - 1,
+                      PHOTO_H - fade - 1
                   ),
-                  outline=180,
-                  width=18
+                  fill=255
               )
 
-              # Correct Pillow GaussianBlur usage
-              vignette = vignette.filter(
+              # Feather the edges
+              mask = mask.filter(
                   ImageFilter.GaussianBlur(
                       radius=10
                   )
@@ -328,20 +326,19 @@ jobs:
 
 
               # --------------------------------------
-              # Dark overlay
+              # Blend photo into terminal background
               # --------------------------------------
 
-              dark_overlay = Image.new(
+              background = Image.new(
                   "RGB",
                   (PHOTO_W, PHOTO_H),
-                  (0, 0, 0)
+                  BG
               )
 
-
               photo = Image.composite(
-                  dark_overlay,
                   photo,
-                  vignette
+                  background,
+                  mask
               )
 
 
@@ -523,22 +520,6 @@ jobs:
 
 
                   # ----------------------------------
-                  # Terminal-style frame
-                  # ----------------------------------
-
-                  draw.rectangle(
-                      (
-                          PHOTO_X - 4,
-                          PHOTO_Y - 4,
-                          PHOTO_X + PHOTO_W + 4,
-                          PHOTO_Y + PHOTO_H + 4
-                      ),
-                      outline=(45, 100, 55),
-                      width=1
-                  )
-
-
-                  # ----------------------------------
                   # Photo reveal
                   # ----------------------------------
 
@@ -690,6 +671,6 @@ jobs:
 
           git add profile.json profile-card.gif
 
-          git diff --cached --quiet || git commit -m "Refine terminal photo styling"
+          git diff --cached --quiet || git commit -m "Blend terminal photo into UI"
 
           git push
