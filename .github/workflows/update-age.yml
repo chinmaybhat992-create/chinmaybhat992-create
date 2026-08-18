@@ -239,7 +239,7 @@ jobs:
               (name, "name"),
 
               (
-                  "COMPUTER SCIENCE / DEVELOPER / OPEN SOURCE",
+                  "COMPUTER SCIENCE / DEVELOPER / CODER",
                   "muted"
               ),
 
@@ -656,7 +656,7 @@ jobs:
 
               draw.text(
                   (28, 20),
-                  "CHINMAY_OS v1.0",
+                  "BHAT_OS v1.0",
                   font=FONT_SMALL,
                   fill=MUTED
               )
@@ -667,7 +667,7 @@ jobs:
                       WIDTH // 2,
                       20
                   ),
-                  "TERMINAL // PROFILE",
+                  "TERMINAL",
                   font=FONT_SMALL,
                   fill=MUTED,
                   anchor="ma"
@@ -679,7 +679,7 @@ jobs:
                       WIDTH - 28,
                       20
                   ),
-                  "ONLINE",
+                  "ACTIVE",
                   font=FONT_SMALL,
                   fill=GREEN,
                   anchor="ra"
