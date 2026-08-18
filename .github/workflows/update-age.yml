@@ -27,7 +27,7 @@ jobs:
           python3 << 'PY'
           import json
           from datetime import date
-          from PIL import Image, ImageDraw, ImageFont
+          from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
 
           # ==========================================
@@ -109,17 +109,54 @@ jobs:
           WIDTH = 900
           HEIGHT = 460
 
-          # GitHub dark-mode background
           BG = (13, 17, 23)
-
-          # GitHub primary text
           WHITE = (240, 246, 252)
-
-          # GitHub secondary text
           MUTED = (139, 148, 158)
-
-          # GitHub green accent
           GREEN = (63, 185, 80)
+
+
+          # ==========================================
+          # PHOTO SETTINGS
+          # ==========================================
+
+          PHOTO_X = 650
+          PHOTO_Y = 72
+
+          PHOTO_WIDTH = 220
+          PHOTO_HEIGHT = 300
+
+
+          # ==========================================
+          # LOAD AND PREPARE PHOTO
+          # ==========================================
+
+          photo = Image.open(
+              "profile-photo.jpg"
+          ).convert("RGB")
+
+          # Crop the photo to fit the terminal area.
+          photo = ImageOps.fit(
+              photo,
+              (PHOTO_WIDTH, PHOTO_HEIGHT),
+              method=Image.Resampling.LANCZOS,
+              centering=(0.5, 0.38)
+          )
+
+          # Give the photo a subtle terminal/CRT appearance.
+          grayscale = photo.convert("L")
+
+          photo = Image.merge(
+              "RGB",
+              (
+                  grayscale.point(lambda p: int(p * 0.55)),
+                  grayscale.point(lambda p: int(p * 0.95)),
+                  grayscale.point(lambda p: int(p * 0.55))
+              )
+          )
+
+          photo = ImageEnhance.Contrast(
+              photo
+          ).enhance(1.15)
 
 
           # ==========================================
@@ -143,7 +180,12 @@ jobs:
 
           FONT_NORMAL = ImageFont.truetype(
               FONT_PATH,
-              18
+              17
+          )
+
+          FONT_JSON = ImageFont.truetype(
+              FONT_PATH,
+              15
           )
 
           FONT_LARGE = ImageFont.truetype(
@@ -205,7 +247,10 @@ jobs:
           # FRAME RENDERER
           # ==========================================
 
-          def create_frame(visible_text):
+          def create_frame(
+              visible_text,
+              photo_progress=0
+          ):
 
               image = Image.new(
                   "RGB",
@@ -242,6 +287,36 @@ jobs:
                   fill=GREEN,
                   anchor="ra"
               )
+
+
+              # ======================================
+              # PHOTO REVEAL
+              # ======================================
+
+              if photo_progress > 0:
+
+                  visible_height = int(
+                      PHOTO_HEIGHT * photo_progress
+                  )
+
+                  if visible_height > 0:
+
+                      photo_crop = photo.crop(
+                          (
+                              0,
+                              0,
+                              PHOTO_WIDTH,
+                                                           visible_height
+                          )
+                      )
+
+                      image.paste(
+                          photo_crop,
+                          (
+                              PHOTO_X,
+                              PHOTO_Y
+                          )
+                      )
 
 
               # ======================================
@@ -284,9 +359,9 @@ jobs:
 
                   else:
 
-                      font = FONT_NORMAL
+                      font = FONT_JSON
                       color = WHITE
-                      spacing = 31
+                      spacing = 29
 
 
                   draw.text(
@@ -308,8 +383,6 @@ jobs:
 
           frames = []
 
-
-          # Faster typing
           FRAMES_PER_CHARACTER = 1
 
 
@@ -318,7 +391,10 @@ jobs:
           # ==========================================
 
           frames.append(
-              create_frame([])
+              create_frame(
+                  [],
+                  0
+              )
           )
 
 
@@ -336,7 +412,24 @@ jobs:
               visible.append("")
 
 
+              # --------------------------------------
+              # PHOTO STARTS REVEALING AFTER WHOAMI
+              # --------------------------------------
+
+              if line_index >= 2:
+
+                  photo_progress = min(
+                      1,
+                      (line_index - 1) / 8
+                  )
+
+              else:
+
+                  photo_progress = 0
+
+
               # Type one character at a time
+
               for character_index in range(
                   1,
                   len(text) + 1
@@ -345,19 +438,53 @@ jobs:
                   visible[-1] = text[:character_index]
 
                   frame = create_frame(
-                      visible.copy()
+                      visible.copy(),
+                      photo_progress
                   )
 
                   frames.append(frame)
 
 
-              # Small pause after completing each line
+              # Small pause after completed line
+
               finished_frame = create_frame(
-                  visible.copy()
+                  visible.copy(),
+                  photo_progress
               )
 
               for _ in range(2):
-                  frames.append(finished_frame)
+                  frames.append(
+                      finished_frame
+                  )
+
+
+          # ==========================================
+          # PHOTO FINAL REVEAL
+          # ==========================================
+
+          completed_text = [
+              line[0]
+              for line in lines
+          ]
+
+
+          # Reveal photo smoothly from top to bottom.
+
+          PHOTO_REVEAL_FRAMES = 18
+
+          for i in range(
+              1,
+              PHOTO_REVEAL_FRAMES + 1
+          ):
+
+              progress = i / PHOTO_REVEAL_FRAMES
+
+              frames.append(
+                  create_frame(
+                      completed_text,
+                      progress
+                  )
+              )
 
 
           # ==========================================
@@ -365,13 +492,18 @@ jobs:
           # ==========================================
 
           final_frame = create_frame(
-              [line[0] for line in lines]
+              completed_text,
+              1
           )
 
 
-          # Hold the final completed state
+          # Hold final completed state
+
           for _ in range(30):
-              frames.append(final_frame)
+
+              frames.append(
+                  final_frame
+              )
 
 
           # ==========================================
@@ -382,7 +514,7 @@ jobs:
               "profile-card.gif",
               save_all=True,
               append_images=frames[1:],
-              duration=35,
+              duration=30,
               optimize=True
           )
 
